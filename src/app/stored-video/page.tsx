@@ -7,16 +7,16 @@ const StoredVideoPage = () => {
     const [storedVideos, setStoredVideos] = useState<string[]>([]);
 
     useEffect(() => {
-        // Lấy video đã lưu từ localStorage
+        // Retrieve stored videos from localStorage
         const videos = JSON.parse(localStorage.getItem("storedVideos") || "[]");
         setStoredVideos(videos);
-        console.log("Loaded Stored Videos:", videos); // Log để kiểm tra
+        console.log("Loaded Stored Videos:", videos); // Log to check
     }, []);
 
     return (
         <LayoutWithHeader>
             <div className="p-4">
-                <h1 className="text-2xl font-semibold mb-4">Các Video Đã Lưu</h1>
+                <h1 className="text-2xl font-semibold mb-4">Stored Videos</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {storedVideos.length > 0 ? (
                         storedVideos.map((videoUrl, index) => (
@@ -24,13 +24,13 @@ const StoredVideoPage = () => {
                                 <h3 className="text-white text-lg">Video {index + 1}</h3>
                                 <video
                                     controls
-                                    src={videoUrl}  // Sử dụng Blob URL lấy từ localStorage
-                                    className="w-full h-full object-cover rounded-md"
+                                    src={videoUrl}  // Use Blob URL saved in localStorage
+                                    className="w-full h-64 object-cover rounded-md"
                                 />
                             </div>
                         ))
                     ) : (
-                        <p className="text-white">Chưa có video nào được lưu.</p>
+                        <p className="text-white">No videos stored yet.</p>
                     )}
                 </div>
             </div>
