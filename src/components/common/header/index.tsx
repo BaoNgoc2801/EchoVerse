@@ -13,7 +13,7 @@ const Header = () => {
                             className="w-12 h-12 object-contain"
                         />
                     </Link>
-                    <h1 className="text-2xl font-bold">NimoLive</h1>
+                    <h1 className="text-2xl font-bold">EchoVerse</h1>
                 </div>
 
                 {/* Navigation Links */}

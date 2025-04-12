@@ -1,4 +1,4 @@
-import Controls from "./Controls";
+import Controls from "./controls";
 import {useState} from "react";
 
 const MyStreamComponent = () => {

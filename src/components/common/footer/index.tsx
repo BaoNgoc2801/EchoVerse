@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
                             <p className="text-xl font-semibold mb-4">Learn more</p>
                             <ul className="flex flex-col gap-2 text-gray-600">
                                 <li className="hover:text-blue-600 cursor-pointer">
-                                    About StreamBox
+                                    About EchoVerse
                                 </li>
                                 <li className="hover:text-blue-600 cursor-pointer">
                                     Contact us
@@ -49,10 +49,10 @@ const Footer: React.FC = () => {
                         <div className="flex-1">
                             <p className="text-xl font-semibold mb-4">Contact</p>
                             <ul className="flex flex-col gap-2 text-gray-600">
-                                <li>123 StreamBox Ave.</li>
+                                <li>123 EchoVerse Ave.</li>
                                 <li>Media City, Innovation District</li>
                                 <li>Phone: (123) 456-7890</li>
-                                <li>Email: support@streambox.com</li>
+                                <li>Email: support@echoverse.com</li>
                             </ul>
                         </div>
 
@@ -109,7 +109,7 @@ const Footer: React.FC = () => {
                     </div>
                 </div>
                 <div className="text-center py-4 text-gray-500">
-                    &copy; 2025 StreamBox. All rights reserved.
+                    &copy; 2025 EchoVerse. All rights reserved.
                 </div>
             </div>
         </footer>
