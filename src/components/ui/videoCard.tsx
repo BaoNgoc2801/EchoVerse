@@ -14,7 +14,7 @@ const VideoCard: FC<VideoCardProps> = ({ stream }) => {
                 <p className="text-gray-400">{stream.user}</p>
                 <p className="text-gray-300">{stream.viewers} viewers</p>
                 <Link href={`/livestream/${stream.id}`} passHref>
-                    <button className="mt-2 bg-blue-600 text-white py-2 px-4 rounded-full w-full">Join</button>
+                    <button className="mt-2 bg-green-700 text-white py-2 px-4 rounded-full w-full">Join</button>
                 </Link>
             </div>
         </div>

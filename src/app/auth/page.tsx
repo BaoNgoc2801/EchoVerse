@@ -13,7 +13,6 @@ interface AuthModalProps {
 const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     const [isSignUp, setIsSignUp] = useState(false);
 
-    // Toggle form mode between SignUp and SignIn
     const handleToggle = () => {
         setTimeout(() => {
             setIsSignUp((prev) => !prev);
