@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import LayoutWithHeader from "@/components/layout/layout-with-header";
-import { Eye } from "lucide-react";  // Importing the Eye icon from lucide-react
+import { Eye } from "lucide-react";
 
 const LiveStream = ({ onClose }: { onClose: () => void }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -16,7 +16,6 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
     const [duration, setDuration] = useState<string>("00:00");  // Store live stream duration
     let mediaRecorder: MediaRecorder | null = null;
 
-    // Update the live stream duration every second
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
@@ -28,40 +27,37 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                     const minutes = Math.floor((currentDuration % 3600) / 60);
                     const seconds = currentDuration % 60;
                     setDuration(`${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
-                    console.log(`Current Duration: ${duration}`); // Log the current duration
+                    console.log(`Current Duration: ${duration}`);
                 }
-            }, 1000);  // Update every second
+            }, 1000);
         }
 
         return () => {
             if (interval) {
-                clearInterval(interval);  // Clear the interval when the component unmounts or stops streaming
+                clearInterval(interval);
             }
         };
     }, [isStreaming, startTime, duration]);
 
-    // Start streaming and begin recording
     const startStreaming = async () => {
-        if (isStreaming) return; // Prevent starting the stream if it's already streaming
-
+        if (isStreaming) return;
         console.log("Starting live stream...");
 
         try {
             const userStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             setStream(userStream);
             if (videoRef.current) {
-                videoRef.current.srcObject = userStream;  // Assign the stream to the video element
+                videoRef.current.srcObject = userStream;
             }
 
-            // Initialize MediaRecorder to record with the Matroska format and codecs avc1 and opus
             const options = { mimeType: "video/x-matroska;codecs=avc1,opus" };
             mediaRecorder = new MediaRecorder(userStream, options);
             mediaRecorder.ondataavailable = (event) => {
-                console.log("Recording video chunk..."); // Log when a video chunk is available
+                console.log("Recording video chunk...");
                 if (event.data.size > 0) {
                     setRecordedChunks((prev) => {
                         const updatedChunks = [...prev, event.data];
-                        console.log("Recorded chunks:", updatedChunks); // Log the current recorded chunks
+                        console.log("Recorded chunks:", updatedChunks);
                         return updatedChunks;
                     });
                 }
@@ -69,8 +65,8 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
             mediaRecorder.start();
             console.log("MediaRecorder started.");
 
-            setStartTime(Date.now());  // Start the live stream timer
-            setIsStreaming(true);  // Set streaming status to true
+            setStartTime(Date.now());
+            setIsStreaming(true);
             console.log("Live stream started at:", startTime);
         } catch (error) {
             console.error("Error accessing media devices:", error);
@@ -78,9 +74,8 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
         }
     };
 
-    // Stop streaming and recording
     const stopStreaming = () => {
-        if (!isStreaming) return; // Prevent stopping if not currently streaming
+        if (!isStreaming) return;
 
         console.log("Stopping live stream...");
 
@@ -91,36 +86,30 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
         console.log("Live stream stopped.");
     };
 
-    // Save the recorded video
     const saveVideo = () => {
         if (recordedChunks.length > 0) {
-            // Create a Blob from the recorded video chunks
             const blob = new Blob(recordedChunks, { type: "video/webm" });
             const url = URL.createObjectURL(blob);
 
-            // Log the URL of the saved video
             console.log("Video saved successfully! Video URL:", url);
 
-            // Optionally, you can store the video URL in localStorage (for persistence)
             const storedVideos = JSON.parse(localStorage.getItem("storedVideos") || "[]");
             storedVideos.push(url);
             localStorage.setItem("storedVideos", JSON.stringify(storedVideos));
 
-            // Log the stored videos in localStorage
             console.log("Stored Videos in LocalStorage:", storedVideos);
 
             setRecordedChunks([]);
-            onClose(); // Close or clean up after saving
+            onClose();
         } else {
             console.error("No recorded chunks available for saving!");
         }
     };
 
-    // Handle new comment submission
     const handleCommentSubmit = () => {
         if (newComment.trim()) {
             setComments((prev) => [...prev, newComment.trim()]);
-            setNewComment(""); // Clear the comment input
+            setNewComment("");
             console.log("New comment added:", newComment);
         }
     };
@@ -133,7 +122,7 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
         }
 
         return () => {
-            stopStreaming(); // Cleanup when component unmounts
+            stopStreaming();
         };
     }, [isStreaming]);
 
@@ -141,7 +130,6 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
         <LayoutWithHeader>
             <div className="flex flex-col items-center justify-center p-4 pt-20 z-50 w-full h-full">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-full">
-                    {/* Left side: Video Player */}
                     <div className="col-span-2 w-full h-full relative">
                         <video
                             ref={videoRef}
@@ -149,19 +137,16 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                             className="w-full h-full object-cover rounded-md"
                         ></video>
 
-                        {/* Stream Duration Display (Right Corner) */}
                         <div className="absolute top-4 right-4 bg-black text-white p-2 rounded-md">
                             <span>{duration}</span> {/* Display the live stream duration */}
                         </div>
 
-                        {/* Viewers Display (Left Corner) */}
                         <div className="absolute top-4 left-4 flex items-center bg-black text-white p-2 rounded-md">
                             <Eye size={24} />
                             <span className="ml-2">{viewers} viewers</span>
                         </div>
                     </div>
 
-                    {/* Right side: Comments Section */}
                     <div className="w-full h-full bg-gray-800 p-4 rounded-lg">
                         <h3 className="text-white text-lg mb-4">Live Comments</h3>
                         <div className="h-96 overflow-y-scroll mb-4">
@@ -187,7 +172,6 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                     </div>
                 </div>
 
-                {/* Bottom control buttons */}
                 <div className="absolute bottom-5 flex gap-4 w-full justify-center">
                     {!isStreaming ? (
                         <button
@@ -204,12 +188,7 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                             >
                                 End
                             </button>
-                            <button
-                                onClick={saveVideo}
-                                className="bg-blue-500 text-white px-6 py-3 rounded-lg text-lg"
-                            >
-                                Save
-                            </button>
+
                         </>
                     )}
                 </div>

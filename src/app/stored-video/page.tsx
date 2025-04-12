@@ -7,10 +7,9 @@ const StoredVideoPage = () => {
     const [storedVideos, setStoredVideos] = useState<string[]>([]);
 
     useEffect(() => {
-        // Retrieve stored videos from localStorage
         const videos = JSON.parse(localStorage.getItem("storedVideos") || "[]");
         setStoredVideos(videos);
-        console.log("Loaded Stored Videos:", videos); // Log to check
+        console.log("Loaded Stored Videos:", videos);
     }, []);
 
     return (
@@ -24,7 +23,7 @@ const StoredVideoPage = () => {
                                 <h3 className="text-white text-lg">Video {index + 1}</h3>
                                 <video
                                     controls
-                                    src={videoUrl}  // Use Blob URL saved in localStorage
+                                    src={videoUrl}
                                     className="w-full h-64 object-cover rounded-md"
                                 />
                             </div>
