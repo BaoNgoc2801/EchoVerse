@@ -1,62 +1,68 @@
-// src/app/livestream/page.tsx
-'use client';  // This ensures this component is treated as a client-side component
+"use client"
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 
-const Livestream = ({ params }: { params: { id: string } }) => {
-    const [comments, setComments] = useState<string[]>([]);
+const LiveStream = ({ onClose }: { onClose: () => void }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [stream, setStream] = useState<MediaStream | null>(null);
+    const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+    const [videos, setVideos] = useState<string[]>([]);
+    let mediaRecorder: MediaRecorder | null = null;
 
-    const handleCommentSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // Cast event target to HTMLFormElement and access the input element
-        const form = e.target as HTMLFormElement;
-        const commentInput = form.elements.namedItem('comment') as HTMLInputElement;
-        if (commentInput && commentInput.value) {
-            setComments([...comments, commentInput.value]);
-            commentInput.value = ''; // Clear the input after submitting
+    const startStreaming = async () => {
+        try {
+            const userStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            setStream(userStream);
+            if (videoRef.current) {
+                videoRef.current.srcObject = userStream;
+            }
+            mediaRecorder = new MediaRecorder(userStream);
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    setRecordedChunks((prev) => [...prev, event.data]);
+                }
+            };
+            mediaRecorder.start();
+        } catch (error) {
+            console.error("Error accessing media devices.", error);
         }
     };
 
+    const stopStreaming = () => {
+        stream?.getTracks().forEach((track) => track.stop());
+        setStream(null);
+        mediaRecorder?.stop();
+    };
+
+    const saveVideo = () => {
+        if (recordedChunks.length > 0) {
+            const blob = new Blob(recordedChunks, { type: "video/webm" });
+            const url = URL.createObjectURL(blob);
+            setVideos((prev) => [...prev, url]);
+            setRecordedChunks([]);
+            onClose();
+        }
+    };
+
+    useEffect(() => {
+        startStreaming();
+        return () => stopStreaming();
+    }, []);
+
     return (
-        <div className="container mx-auto p-4">
-            <div className="flex flex-col md:flex-row gap-6">
-                {/* Video Player */}
-                <div className="flex-1">
-                    <div className="bg-gray-800 h-[400px] flex items-center justify-center">
-                        {/* Replace with actual video */}
-                        <h2 className="text-white text-2xl">Live Video Stream {params.id}</h2>
-                    </div>
-                </div>
+        <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+            <video ref={videoRef} autoPlay className="w-full h-full object-cover"></video>
 
-                {/* Chatbox */}
-                <div className="flex-1">
-                    <h2 className="text-xl font-bold text-white mb-4">Live Chat</h2>
-                    <div className="bg-gray-700 p-4 rounded-lg h-[400px] overflow-y-auto">
-                        {comments.map((comment, index) => (
-                            <div key={index} className="text-white mb-2">
-                                <strong>User {index + 1}:</strong> {comment}
-                            </div>
-                        ))}
-                    </div>
-
-                    <form className="mt-4" onSubmit={handleCommentSubmit}>
-                        <input
-                            type="text"
-                            name="comment"
-                            className="w-full p-3 bg-gray-800 text-white rounded-lg"
-                            placeholder="Type your comment here"
-                        />
-                        <button
-                            type="submit"
-                            className="mt-2 w-full p-3 bg-blue-600 text-white rounded-lg"
-                        >
-                            Send
-                        </button>
-                    </form>
-                </div>
+            <div className="absolute bottom-5 flex gap-4">
+                <button onClick={stopStreaming} className="bg-red-500 text-white px-6 py-3 rounded-lg text-lg">
+                    End
+                </button>
+                <button onClick={saveVideo} className="bg-blue-500 text-white px-6 py-3 rounded-lg text-lg">
+                    Save
+                </button>
             </div>
         </div>
     );
 };
 
-export default Livestream;
+export default LiveStream;
