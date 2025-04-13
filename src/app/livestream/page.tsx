@@ -11,9 +11,9 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
     const [comments, setComments] = useState<string[]>([]);
     const [newComment, setNewComment] = useState<string>("");
     const [isStreaming, setIsStreaming] = useState<boolean>(false);
-    const [startTime, setStartTime] = useState<number | null>(null);  // To track the live stream start time
-    const [viewers, setViewers] = useState<number>(0);  // Mock viewer count
-    const [duration, setDuration] = useState<string>("00:00");  // Store live stream duration
+    const [startTime, setStartTime] = useState<number | null>(null);
+    const [viewers, setViewers] = useState<number>(0);
+    const [duration, setDuration] = useState<string>("00:00");
     let mediaRecorder: MediaRecorder | null = null;
 
     useEffect(() => {
@@ -114,6 +114,12 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
         }
     };
 
+    const handleCommentKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleCommentSubmit();
+        }
+    };
+
     useEffect(() => {
         if (isStreaming) {
             startStreaming();
@@ -138,7 +144,7 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                         ></video>
 
                         <div className="absolute top-4 right-4 bg-black text-white p-2 rounded-md">
-                            <span>{duration}</span> {/* Display the live stream duration */}
+                            <span>{duration}</span> {/* Display duration */}
                         </div>
 
                         <div className="absolute top-4 left-4 flex items-center bg-black text-white p-2 rounded-md">
@@ -161,18 +167,13 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                             placeholder="Add a comment..."
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
+                            onKeyDown={handleCommentKeyPress}  // Trigger comment on Enter key press
                             className="w-full p-2 rounded-md bg-gray-700 text-white focus:outline-none"
                         />
-                        <button
-                            onClick={handleCommentSubmit}
-                            className="mt-2 bg-purple-600 text-white px-4 py-2 rounded-lg w-full"
-                        >
-                            Post Comment
-                        </button>
                     </div>
                 </div>
 
-                <div className="absolute bottom-5 flex gap-4 w-full justify-center">
+                <div className="absolute top-5 right-5">
                     {!isStreaming ? (
                         <button
                             onClick={startStreaming}
@@ -184,11 +185,16 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                         <>
                             <button
                                 onClick={stopStreaming}
-                                className="bg-red-500 text-white px-6 py-3 rounded-lg text-lg"
+                                className="bg-red-500 text-white px-4 py-2 rounded-lg text-lg transition transform duration-300 hover:scale-105"
                             >
                                 End
                             </button>
-
+                            <button
+                                onClick={saveVideo}
+                                className="bg-blue-500 text-white px-6 py-3 rounded-lg text-lg"
+                            >
+                                Save
+                            </button>
                         </>
                     )}
                 </div>
