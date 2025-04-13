@@ -1,4 +1,6 @@
-import React from "react";
+"use client"
+
+import React, { useState } from "react";
 
 type Message = {
     id: string;
@@ -24,7 +26,28 @@ const mockChat: Chat = {
     ],
 };
 
-const ChatPopup = ({ chat = mockChat, onClose }: { chat: Chat; onClose: () => void }) => {
+const ChatPopup = ({ chat, onClose }: { chat: Chat; onClose: () => void }) => {
+    const [newMessage, setNewMessage] = useState(""); // State to hold new message
+
+    // Function to handle input change
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setNewMessage(e.target.value);
+    };
+
+    // Function to handle sending a message
+    const handleSendMessage = () => {
+        if (newMessage.trim()) {
+            const newMessageObject: Message = {
+                id: (chat.messages.length + 1).toString(),
+                text: newMessage,
+                sender: "You", // The sender will be "You" as it is the user's message
+                time: new Date().toLocaleTimeString(),
+            };
+            chat.messages.push(newMessageObject); // Add the new message to the messages array
+            setNewMessage(""); // Clear the input field
+        }
+    };
+
     return (
         <div className="fixed bottom-6 right-6 bg-white text-black shadow-lg rounded-lg w-80 p-4 z-20 max-h-96">
             <div className="flex justify-between items-center mb-4">
@@ -52,13 +75,34 @@ const ChatPopup = ({ chat = mockChat, onClose }: { chat: Chat; onClose: () => vo
             <div className="flex items-center space-x-2">
                 <input
                     type="text"
+                    value={newMessage}
+                    onChange={handleInputChange} // Handle input change
                     placeholder="Type a message..."
                     className="bg-gray-100 text-sm p-2 w-full rounded-lg focus:outline-none"
                 />
-                <button className="bg-blue-500 text-white p-2 rounded-full">Send</button>
+                <button
+                    onClick={handleSendMessage} // Send message when button is clicked
+                    className="bg-blue-500 text-white p-2 rounded-full"
+                >
+                    Send
+                </button>
             </div>
         </div>
     );
 };
 
-export default ChatPopup;
+const ChatApp = () => {
+    const [isPopupVisible, setIsPopupVisible] = useState(true);
+
+    const handleClosePopup = () => {
+        setIsPopupVisible(false);
+    };
+
+    return (
+        <div>
+            {isPopupVisible && <ChatPopup chat={mockChat} onClose={handleClosePopup} />}
+        </div>
+    );
+};
+
+export default ChatApp;
