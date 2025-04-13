@@ -1,6 +1,21 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { Video } from "lucide-react"; // Using Lucide for icon
+import AuthModal from "@/app/auth/page";
 
 const Header = () => {
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const openModal = () => {
+        setShowAuthModal(true);
+    };
+
+    // Function to close the modal
+    const closeModal = () => {
+        setShowAuthModal(false);
+    };
+
     return (
         <header className="bg-black text-white shadow-md py-4">
             <div className="mx-auto px-4 flex items-center justify-between">
@@ -8,12 +23,12 @@ const Header = () => {
                 <div className="flex items-center space-x-4">
                     <Link href="/">
                         <img
-                            src="/image/logo.png" // Replace with your logo path
+                            src="/image/logo.png"
                             alt="Logo"
                             className="w-12 h-12 object-contain"
                         />
                     </Link>
-                    <h1 className="text-2xl font-bold">NimoLive</h1>
+                    <h1 className="text-2xl font-bold">EchoVerse</h1>
                 </div>
 
                 {/* Navigation Links */}
@@ -30,10 +45,20 @@ const Header = () => {
                     <Link href="/settings">
                         Settings
                     </Link>
+
                 </nav>
+
 
                 {/* Search Bar and Sign In Button */}
                 <div className="flex items-center space-x-4">
+                    {/* Go Live Button */}
+                    <Link href="/livestream">
+                        <button className="flex items-center space-x-2 bg-red-600 text-white py-2 px-4 rounded-full hover:bg-red-700 transition duration-300">
+                            <Video size={18} />
+                            <span>Go Live</span>
+                        </button>
+                    </Link>
+
                     {/* Search Bar */}
                     <div className="relative">
                         <input
@@ -57,12 +82,15 @@ const Header = () => {
                         </svg>
                     </div>
 
+
+
                     {/* Sign In Button */}
-                    <Link href="/signin">
-                        <button className="bg-green-800 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300">
-                            Sign In
-                        </button>
-                    </Link>
+                    <button
+                        onClick={openModal} // Open the modal on click
+                        className="bg-green-800 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300"
+                    >
+                        Sign In
+                    </button>
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -70,6 +98,9 @@ const Header = () => {
                     <i className="fas fa-bars"></i> {/* Hamburger icon */}
                 </button>
             </div>
+
+            {showAuthModal && <AuthModal onClose={closeModal}/>}
+
         </header>
     );
 };

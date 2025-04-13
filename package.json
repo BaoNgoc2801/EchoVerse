@@ -20,7 +20,9 @@
     "stream-chat": "^8.59.0",
     "stream-chat-react": "^12.14.0",
     "style-loader": "^4.0.0",
-    "twilio-video": "^2.30.0"
+    "twilio-video": "^2.30.0",
+    "uuid": "^11.1.0",
+    "webrtc-adapter": "^9.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -28,6 +30,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
     "file-loader": "^6.2.0",

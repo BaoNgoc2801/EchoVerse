@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import AgoraRTC from "agora-rtc-sdk-ng";
 
-const Livestream: React.FC = () => {
+const Index: React.FC = () => {
     const [localStream, setLocalStream] = useState<any>(null);
     const [remoteStreams, setRemoteStreams] = useState<any[]>([]);
     const [channel, setChannel] = useState<string | undefined>(undefined);
@@ -71,4 +71,4 @@ const Livestream: React.FC = () => {
     );
 };
 
-export default Livestream;
+export default Index;

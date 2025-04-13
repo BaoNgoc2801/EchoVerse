@@ -11,4 +11,5 @@ const StreamCard = ({ title, viewers, thumbnail }: StreamCardProps) => (
         <p className="text-gray-400 text-xs">{viewers} viewers</p>
     </div>
 );
+
 export default StreamCard;
