@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import LayoutWithHeader from "@/components/layout/layout-with-header";
@@ -134,7 +134,9 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
 
     return (
         <LayoutWithHeader>
-            <div className="flex flex-col items-center justify-center p-4 pt-20 z-50 w-full h-full">
+            <div className="flex flex-col items-center justify-center p-4 pt-20 z-50 w-full h-full relative">
+
+                {/* Video Section */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-full">
                     <div className="col-span-2 w-full h-full relative">
                         <video
@@ -153,6 +155,7 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                         </div>
                     </div>
 
+                    {/* Comments Section */}
                     <div className="w-full h-full bg-gray-800 p-4 rounded-lg">
                         <h3 className="text-white text-lg mb-4">Live Comments</h3>
                         <div className="h-96 overflow-y-scroll mb-4">
@@ -162,22 +165,26 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                                 </div>
                             ))}
                         </div>
-                        <input
-                            type="text"
-                            placeholder="Add a comment..."
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            onKeyDown={handleCommentKeyPress}  // Trigger comment on Enter key press
-                            className="w-full p-2 rounded-md bg-gray-700 text-white focus:outline-none"
-                        />
+
+                        <div className="flex items-center space-x-4">
+                            <input
+                                type="text"
+                                placeholder="Add a comment..."
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                onKeyDown={handleCommentKeyPress}  // Trigger comment on Enter key press
+                                className="w-full p-2 rounded-full bg-gray-700 text-white focus:outline-none"
+                            />
+                        </div>
                     </div>
                 </div>
 
-                <div className="absolute top-5 right-5">
+                {/* Bottom Buttons (Live control buttons) */}
+                <div className="absolute bottom-5 flex gap-4 w-full justify-center">
                     {!isStreaming ? (
                         <button
                             onClick={startStreaming}
-                            className="bg-green-500 text-white px-6 py-3 rounded-lg text-lg"
+                            className="bg-green-500 text-white px-6 py-3 rounded-full text-lg mr-100"
                         >
                             Start Live
                         </button>
@@ -185,13 +192,14 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                         <>
                             <button
                                 onClick={stopStreaming}
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg text-lg transition transform duration-300 hover:scale-105"
+                                className="bg-red-500 text-white px-6 py-3 rounded-full text-lg transition transform duration-300 hover:scale-105"
                             >
                                 End
                             </button>
+
                             <button
                                 onClick={saveVideo}
-                                className="bg-blue-500 text-white px-6 py-3 rounded-lg text-lg"
+                                className="bg-blue-500 text-white px-6 py-3 rounded-full text-lg"
                             >
                                 Save
                             </button>
