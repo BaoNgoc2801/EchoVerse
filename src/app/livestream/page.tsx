@@ -192,17 +192,11 @@ const LiveStream = ({ onClose }: { onClose: () => void }) => {
                         <>
                             <button
                                 onClick={stopStreaming}
-                                className="bg-red-500 text-white px-6 py-3 rounded-full text-lg transition transform duration-300 hover:scale-105"
+                                className="bg-red-500 text-white px-6 py-3 rounded-full text-lg mr-100"
                             >
                                 End
                             </button>
 
-                            <button
-                                onClick={saveVideo}
-                                className="bg-blue-500 text-white px-6 py-3 rounded-full text-lg"
-                            >
-                                Save
-                            </button>
                         </>
                     )}
                 </div>
