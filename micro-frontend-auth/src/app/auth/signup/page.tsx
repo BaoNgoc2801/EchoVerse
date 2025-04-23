@@ -67,8 +67,8 @@ const RegisterPage = ({ onClose }: { onClose: () => void }) => {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-[#1a1a1a] overflow-auto py-5 px-2">
-            <div className="w-full sm:w-1/2 md:w-1/3 bg-[#2c2c2c] p-8 rounded-lg shadow-lg ">
+        <div className="flex min-h-screen items-center justify-center bg-[#1a1a1a] overflow-auto py-10 px-2">
+            <div className="w-full sm:w-3/6 md:w-3/6 bg-[#2c2c2c] p-8 rounded-lg shadow-lg mt-10">
                 <div className="text-center mb-6 mt-5">
                     <h2 className="text-3xl font-bold mt-4 text-white">Sign Up</h2>
                 </div>
