@@ -1,11 +1,8 @@
-// sign-in-service.ts
 import axios from 'axios';
 
-// API URLs from environment variables
 const LOGIN_API_URL = process.env.NEXT_PUBLIC_LOGIN_API_URL;
 const REFRESH_TOKEN_API_URL = process.env.NEXT_PUBLIC_REFRESH_TOKEN_API_URL;
 
-// API call to sign in with username and password
 export const signIn = async (username: string, password: string) => {
     if (!LOGIN_API_URL) {
         throw new Error('Login API URL is not defined');

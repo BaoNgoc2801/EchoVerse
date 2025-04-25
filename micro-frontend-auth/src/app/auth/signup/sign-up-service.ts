@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// API URL from environment variable
 const REGISTER_API_URL = process.env.NEXT_PUBLIC_REGISTER_API_URL;
 
 interface RegisterData {
@@ -17,7 +16,6 @@ interface RegisterData {
     chanelName: string;
 }
 
-// Function to handle user registration
 export const registerUser = async (data: RegisterData) => {
     if (!REGISTER_API_URL) {
         throw new Error('Register API URL is not defined');
@@ -38,7 +36,6 @@ export const registerUser = async (data: RegisterData) => {
             chanelName: data.chanelName
         });
 
-        // Assuming the response will contain the user data or status
         return response.data;
     } catch (error) {
         throw new Error('Registration failed');
