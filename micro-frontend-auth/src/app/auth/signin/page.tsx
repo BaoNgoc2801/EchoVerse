@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa6';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { z } from 'zod';
 import { signIn } from './sign-in-service';
 
@@ -27,12 +26,15 @@ const LoginPage = () => {
     const onSubmit: SubmitHandler<{ username: string; password: string }> = async (data) => {
         setLoading(true);
         try {
-            const response = await signIn(data.username, data.password);
+            const response = await signIn(data.username, data.password);  // Call signIn from service
+            console.log("Response sign in: ", response);
+
+            // If login is successful, store tokens and redirect to the home page
             if (response) {
                 localStorage.setItem('username', data.username);
                 localStorage.setItem('access_token', response.access_token);
                 localStorage.setItem('refresh_token', response.refresh_token);
-                router.push('/dashboard');
+                router.push('/home');  // Redirect to home page after login
             }
         } catch (error: any) {
             if (error.message === 'Incorrect username or password.') {
@@ -115,7 +117,7 @@ const LoginPage = () => {
                     <p className="text-sm text-gray-500">
                         Don't have an account?{' '}
                         <button
-                            onClick={() => router.push('/signup')}
+                            onClick={() => router.push('/auth/signup')}
                             className="text-green-500 hover:text-green-700"
                         >
                             Sign up

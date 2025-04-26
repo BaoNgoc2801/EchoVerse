@@ -20,14 +20,22 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
     "@eslint/eslintrc": "^3",
+    "@module-federation/nextjs-mf": "^8.8.25",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "babel-loader": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
+    "html-webpack-plugin": "^5.6.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "webpack": "^5.99.7",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
   }
 }
