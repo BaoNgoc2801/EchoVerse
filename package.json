@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
     "agora-rtc-sdk-ng": "^4.23.2",
     "css-loader": "^7.1.2",
     "framer-motion": "^12.6.5",
@@ -16,25 +17,31 @@
     "next": "15.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.56.1",
     "react-icons": "^5.5.0",
     "stream-chat": "^8.59.0",
     "stream-chat-react": "^12.14.0",
     "style-loader": "^4.0.0",
     "twilio-video": "^2.30.0",
     "uuid": "^11.1.0",
-    "webrtc-adapter": "^9.0.1"
+    "webrtc-adapter": "^9.0.1",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9.25.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
-    "eslint": "^9",
+    "eslint": "^9.25.1",
     "eslint-config-next": "15.3.0",
+    "eslint-plugin-react": "^7.37.5",
     "file-loader": "^6.2.0",
+    "globals": "^16.0.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.31.0"
   }
 }

@@ -1,19 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Video } from "lucide-react"; // Using Lucide for icon
-import AuthModal from "@/app/auth/page";
+import { useRouter } from "next/navigation"; // Import useRouter
 
 const Header = () => {
     const [showAuthModal, setShowAuthModal] = useState(false);
-    const openModal = () => {
-        setShowAuthModal(true);
-    };
+    const router = useRouter();  // Initialize useRouter
 
-    // Function to close the modal
-    const closeModal = () => {
-        setShowAuthModal(false);
+    // Function to handle navigation to sign-in page
+    const handleSignIn = () => {
+        router.push("/auth/signin"); // Use router.push() to navigate to the sign-in page
     };
 
     return (
@@ -21,43 +18,33 @@ const Header = () => {
             <div className="mx-auto px-4 flex items-center justify-between">
                 {/* Logo Section */}
                 <div className="flex items-center space-x-4">
-                    <Link href="/">
+                    <a href="/">
                         <img
                             src="/image/logo.png"
                             alt="Logo"
                             className="w-12 h-12 object-contain"
                         />
-                    </Link>
+                    </a>
                     <h1 className="text-2xl font-bold">EchoVerse</h1>
                 </div>
 
                 {/* Navigation Links */}
                 <nav className="hidden md:flex space-x-8">
-                    <Link href="/">
-                        Home
-                    </Link>
-                    <Link href="/livestream">
-                        Livestream
-                    </Link>
-                    <Link href="/profile">
-                        Profile
-                    </Link>
-                    <Link href="/settings">
-                        Settings
-                    </Link>
-
+                    <a href="/">Home</a>
+                    <a href="/livestream">Livestream</a>
+                    <a href="/profile">Profile</a>
+                    <a href="/settings">Settings</a>
                 </nav>
-
 
                 {/* Search Bar and Sign In Button */}
                 <div className="flex items-center space-x-4">
                     {/* Go Live Button */}
-                    <Link href="/livestream">
+                    <a href="/livestream">
                         <button className="flex items-center space-x-2 bg-red-600 text-white py-2 px-4 rounded-full hover:bg-red-700 transition duration-300">
                             <Video size={18} />
                             <span>Go Live</span>
                         </button>
-                    </Link>
+                    </a>
 
                     {/* Search Bar */}
                     <div className="relative">
@@ -82,11 +69,9 @@ const Header = () => {
                         </svg>
                     </div>
 
-
-
-                    {/* Sign In Button */}
+                    {/* Sign In Button (Using useRouter to navigate) */}
                     <button
-                        onClick={openModal} // Open the modal on click
+                        onClick={handleSignIn} // Use onClick to handle navigation
                         className="bg-green-800 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300"
                     >
                         Sign In
@@ -98,9 +83,6 @@ const Header = () => {
                     <i className="fas fa-bars"></i> {/* Hamburger icon */}
                 </button>
             </div>
-
-            {showAuthModal && <AuthModal onClose={closeModal}/>}
-
         </header>
     );
 };
