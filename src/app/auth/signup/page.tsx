@@ -1,14 +1,11 @@
 'use client';
 
-import { FcGoogle } from "react-icons/fc";
-import { AiFillApple } from "react-icons/ai";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import LayoutWithHeader from "@/components/layout/layout-with-header";
 
-// Define the schema using zod
 const schema = z.object({
     username: z.string().nonempty('Username is required'),
     password: z.string().nonempty('Password is required'),
@@ -47,11 +44,9 @@ const RegisterPage = ({ onClose }: { onClose: () => void }) => {
     });
     const [loading, setLoading] = useState(false);
 
-    // Submit handler (no API call, just a placeholder)
     const onSubmit: SubmitHandler<any> = async (data) => {
         setLoading(true);
         try {
-            // Placeholder: Simulating successful registration
             alert('Registration successful!');
             onClose();  // Close the modal on success
         } catch (error) {
