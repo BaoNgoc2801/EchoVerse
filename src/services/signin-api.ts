@@ -1,7 +1,4 @@
-// src/services/signin-api.ts
-
 import axios from 'axios';
-import { useRouter } from 'next/navigation';  // To navigate after login
 
 const LOGIN_API_URL = process.env.NEXT_PUBLIC_LOGIN_API_URL;
 
@@ -14,19 +11,23 @@ export const signIn = async (username: string, password: string) => {
     try {
         const response = await axios.post(LOGIN_API_URL, { username, password });
 
-        if (response.data && response.data.access_token) {
-            localStorage.setItem('access_token', response.data.access_token);
-            localStorage.setItem('refresh_token', response.data.refresh_token);
+        console.log('Server Response:', response.data);
 
-            const router = useRouter();
-            router.push('/home');
+        if (response.data && response.data.code === 0 && response.data.result?._authenticated && response.data.result.token) {
 
-            return response.data;
+            localStorage.setItem('access_token', response.data.result.token);
+
+            return {
+                username,
+                token: response.data.result.token,
+            };
         } else {
-            throw new Error('Invalid response from server');
+            throw new Error('Authentication failed.');
         }
-    } catch (error) {
-        console.error('Login failed: ', error);
-        throw new Error('Incorrect username or password.');
+    } catch (error: any) {
+        console.error('Login error:', error.response?.data || error.message);
+        throw new Error(
+            error.response?.data?.message || 'Incorrect username or password.'
+        );
     }
 };

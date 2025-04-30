@@ -22,6 +22,8 @@ const SignInPage = () => {
 
                 if (username === 'admin' && password === 'admin') {
                     router.push('/admin/dashboard');
+                } else {
+                    router.push('/home');
                 }
             }
         } catch (err: any) {
@@ -31,15 +33,14 @@ const SignInPage = () => {
         }
     };
 
+
     return (
         <div className="flex h-screen items-center justify-center bg-[#1a1a1a]">
             <div className="w-full sm:w-1/2 md:w-1/3 bg-[#2c2c2c] p-8 rounded-lg shadow-lg">
                 <h2 className="text-3xl font-bold text-center text-white">Sign In</h2>
 
-                {/* Display error message */}
                 {error && <p className="text-red-500 text-center mt-2">{error}</p>}
 
-                {/* Sign in form */}
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <label className="block text-sm font-semibold text-gray-300 mb-2">Username</label>
