@@ -1,0 +1,14 @@
+[
+  {
+    "userId": "host123",
+    "role": "host",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6...",
+    "callId": "livestream_demo"
+  },
+  {
+    "userId": "viewer123",
+    "role": "viewer",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6...",
+    "callId": "livestream_demo"
+  }
+]
