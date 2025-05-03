@@ -1,0 +1,14 @@
+[
+  {
+    "userId": "host123",
+    "role": "host",
+    "token": "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJlY2hvdmVyc2UuY29tIiwic3ViIjoiYWRtaW4iLCJleHAiOjE3NDYxNjI2OTQsImlhdCI6MTc0NjE1OTA5NCwianRpIjoiOTUxM2IzNzYtZDgzYi00OWY1LThhZmItMGJhODdkYjNhMDZiIiwic2NvcGUiOiJST0xFX0FETUlOIn0.xVrGhDRj1-MKklsQKoto3sxjHOm-jKKthbGl_LjBB_dBAGFbdYsXaCu3RFdXSdnqds_4ezYqcoV4UIeku3fumQ",
+    "callId": "livestream_demo"
+  },
+  {
+    "userId": "viewer123",
+    "role": "viewer",
+    "token": "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJlY2hvdmVyc2UuY29tIiwic3ViIjoiVHJRQW5oaCIsImV4cCI6MTc0NjE2MjczMywiaWF0IjoxNzQ2MTU5MTMzLCJqdGkiOiIyZTNlZWM2Mi1iZjJhLTRhOGItYmJjZS1kNmM0MTNmNjY5YzEiLCJzY29wZSI6IlJPTEVfVVNFUiJ9.ylLCn9TR1GDhkZ1LSGZsN9kVSTx_bt6DonUKjB_LyzVBSCDL4_ax4vl2HSMnDExz-ahPQd-TP8WFHmXTZR5MCA",
+    "callId": "livestream_demo"
+  }
+]
