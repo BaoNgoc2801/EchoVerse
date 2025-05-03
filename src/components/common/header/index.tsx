@@ -1,82 +1,66 @@
-'use client';
+"use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { Video } from "lucide-react"; // Using Lucide for icon
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useState } from "react";
+import { Video, MessageCircle } from "lucide-react";
+import AuthModal from "@/app/auth/page";
+import ChatList from "@/components/chat-list/index";
+import ChatPopup from "@/components/chat/chat";
+
 
 
 const Header = () => {
     const [showAuthModal, setShowAuthModal] = useState(false);
-    const [userInfo, setUserInfo] = useState({ username: '', avatar: '' });
-    const [isAvatarClicked, setIsAvatarClicked] = useState(false); // State to handle avatar click
-    const router = useRouter();  // Initialize useRouter
-
-    useEffect(() => {
-        // Check if the user is logged in by checking localStorage
-        const username = localStorage.getItem('username');
-
-        if (username) {
-            setUserInfo({ username, avatar: username.charAt(0).toUpperCase() }); // Get the first letter of username
-        }
-    }, []);
+    const [showChatList, setShowChatList] = useState(false);
+    const [selectedChat, setSelectedChat] = useState<null | { id: string; name: string; lastMessage: string; time: string }>(null);
 
 
-    // Function to handle navigation to sign-in page
-    const handleSignIn = () => {
-        router.push("/auth/signin"); // Use router.push() to navigate to the sign-in page
-    };
-    const handleSignOut = () => {
-        localStorage.removeItem('username');
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        setUserInfo({ username: '', avatar: '' });
-        setIsAvatarClicked(false); // Close the "Sign Out" option after sign out
+    const openModal = () => {
+        setShowAuthModal(true);
     };
 
-    const toggleAvatarMenu = () => {
-        setIsAvatarClicked(!isAvatarClicked); // Toggle visibility of the Sign Out button
+    // Function to close the modal
+    const closeModal = () => {
+        setShowAuthModal(false);
+    };
+
+
+    // Toggle the chat list visibility
+    const toggleChatList = () => {
+        setShowChatList((prev) => !prev);
+    };
+
+    const handleChatSelect = (chat: { id: string; name: string; lastMessage: string; time: string }) => {
+        setSelectedChat(chat);
+        setShowChatList(false);
+    };
+
+    const handleCloseChat = () => {
+        setSelectedChat(null);
     };
 
     return (
-        <header className="bg-black text-white shadow-md py-4">
-            <div className="mx-auto px-4 flex items-center justify-between relative">
+        <header className="bg-black text-white shadow-lg py-4">
+            <div className="mx-auto px-6 flex items-center justify-between">
                 {/* Logo Section */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-6">
                     <Link href="/">
                         <img
                             src="/image/logo.png"
                             alt="Logo"
-                            className="w-12 h-12 object-contain"
+                            className="w-14 h-14 object-contain"
                         />
                     </Link>
-                    <h1 className="text-2xl font-bold">EchoVerse</h1>
+                    <h1 className="text-3xl font-semibold">EchoVerse</h1>
                 </div>
 
-                {/* Navigation Links */}
-                <nav className="hidden md:flex space-x-8">
-                    <Link href="/">Home</Link>
-                    <Link href="/livestream">Livestream</Link>
-                    <Link href="/profile">Profile</Link>
-                    <Link href="/settings">Settings</Link>
-                </nav>
-
-                {/* Search Bar and Sign In Button or User Info */}
-                <div className="flex items-center space-x-4">
-                    {/* Go Live Button */}
-                    <Link href="/livestream">
-                        <button className="flex items-center space-x-2 bg-red-600 text-white py-2 px-4 rounded-full hover:bg-red-700 transition duration-300">
-                            <Video size={18} />
-                            <span>Go Live</span>
-                        </button>
-                    </Link>
-
+                <nav className="flex space-x-8 items-center ml-auto">
                     {/* Search Bar */}
                     <div className="relative">
                         <input
                             type="text"
                             placeholder="Search"
-                            className="bg-gray-800 text-white rounded-full px-4 py-2 w-72 focus:outline-none"
+                            className="bg-gray-800 text-white rounded-full px-6 py-2 w-96 focus:outline-none focus:ring-2 focus:ring-purple-600 transition duration-300"
                         />
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -94,42 +78,40 @@ const Header = () => {
                         </svg>
                     </div>
 
-                    {/* If user is logged in, show username and avatar */}
-                    {userInfo.username ? (
-                        <div className="flex items-center space-x-2 relative">
-                            {/* User Info (name) */}
-                            <span className="text-white">{userInfo.username}</span>
-
-                            {/* Avatar Section */}
-                            <div
-                                onClick={toggleAvatarMenu}  // Toggle avatar click
-                                className="w-8 h-8 rounded-full flex items-center justify-center bg-green-500 text-white cursor-pointer"
-                            >
-                                {userInfo.avatar}
-                            </div>
-
-                            {/* Avatar Menu (Sign Out button) */}
-                            {isAvatarClicked && (  // Only show Sign Out when avatar is clicked
-                                <div className="absolute top-10 right-0 bg-gray-800 text-white rounded-lg shadow-lg w-48 p-3 mt-2">
-                                    <button
-                                        onClick={handleSignOut}
-                                        className="w-full text-red-500 bg-white py-2 px-4 rounded-full hover:bg-gray-200 transition duration-300"
-                                    >
-                                        Sign Out
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        // If user is not logged in, show Sign In button
+                    {/* Go Live Button */}
+                    <Link href="/livestream">
                         <button
-                            onClick={handleSignIn}
-                            className="bg-green-800 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300"
+                            className="flex items-center space-x-2 bg-red-600 text-white py-2 px-6 rounded-full hover:bg-red-700 transition duration-300 mr-7"
                         >
-                            Sign In
+                            <Video size={20} />
+                            <span className="font-medium">Go Live</span>
                         </button>
-                    )}
+                    </Link>
+                </nav>
+
+                {/* Search Bar and Sign In Button */}
+                <div className="flex items-center space-x-6">
+                    {/* Chat Icon */}
+                    <div className="relative">
+                        <MessageCircle
+                            size={24}
+                            className="text-white cursor-pointer hover:text-gray-300 transition duration-300"
+                            onClick={toggleChatList}
+                        />
+                    </div>
+
+                    {/* Sign In Button */}
+                    <button
+                        onClick={openModal} // Open the modal on click
+                        className="bg-green-800 text-white py-2 px-6 rounded-full hover:bg-green-700 transition duration-300"
+                    >
+                        Sign In
+                    </button>
                 </div>
+
+                {showChatList && <ChatList onChatSelect={handleChatSelect} />}
+                {selectedChat && <ChatPopup chat={selectedChat} onClose={handleCloseChat} />}
+
 
                 {/* Mobile Menu Button */}
                 <button className="md:hidden text-2xl">
@@ -137,6 +119,7 @@ const Header = () => {
                 </button>
             </div>
 
+            {showAuthModal && <AuthModal onClose={closeModal} />}
         </header>
     );
 };

@@ -1,7 +1,8 @@
-// layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import ChatBox from "@/components/chat/chat"; // Import the ChatBox component
+
 
 import "@radix-ui/themes/styles.css";
 import { Theme, ThemePanel } from "@radix-ui/themes";
@@ -26,6 +27,7 @@ export default function RootLayout({
             grayColor="mauve"
             radius="none"
         >
+        <ChatBox />
             {children}
             <ThemePanel defaultOpen={false} />
         </Theme>
