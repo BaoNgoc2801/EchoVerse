@@ -1,24 +1,46 @@
-"use client";
+'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Video } from "lucide-react"; // Using Lucide for icon
-import AuthModal from "@/app/auth/page";
+import { useRouter } from "next/navigation"; // Import useRouter
+
 
 const Header = () => {
     const [showAuthModal, setShowAuthModal] = useState(false);
-    const openModal = () => {
-        setShowAuthModal(true);
+    const [userInfo, setUserInfo] = useState({ username: '', avatar: '' });
+    const [isAvatarClicked, setIsAvatarClicked] = useState(false); // State to handle avatar click
+    const router = useRouter();  // Initialize useRouter
+
+    useEffect(() => {
+        // Check if the user is logged in by checking localStorage
+        const username = localStorage.getItem('username');
+
+        if (username) {
+            setUserInfo({ username, avatar: username.charAt(0).toUpperCase() }); // Get the first letter of username
+        }
+    }, []);
+
+
+    // Function to handle navigation to sign-in page
+    const handleSignIn = () => {
+        router.push("/auth/signin"); // Use router.push() to navigate to the sign-in page
+    };
+    const handleSignOut = () => {
+        localStorage.removeItem('username');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        setUserInfo({ username: '', avatar: '' });
+        setIsAvatarClicked(false); // Close the "Sign Out" option after sign out
     };
 
-    // Function to close the modal
-    const closeModal = () => {
-        setShowAuthModal(false);
+    const toggleAvatarMenu = () => {
+        setIsAvatarClicked(!isAvatarClicked); // Toggle visibility of the Sign Out button
     };
 
     return (
         <header className="bg-black text-white shadow-md py-4">
-            <div className="mx-auto px-4 flex items-center justify-between">
+            <div className="mx-auto px-4 flex items-center justify-between relative">
                 {/* Logo Section */}
                 <div className="flex items-center space-x-4">
                     <Link href="/">
@@ -33,23 +55,13 @@ const Header = () => {
 
                 {/* Navigation Links */}
                 <nav className="hidden md:flex space-x-8">
-                    <Link href="/">
-                        Home
-                    </Link>
-                    <Link href="/livestream">
-                        Livestream
-                    </Link>
-                    <Link href="/profile">
-                        Profile
-                    </Link>
-                    <Link href="/settings">
-                        Settings
-                    </Link>
-
+                    <Link href="/">Home</Link>
+                    <Link href="/livestream">Livestream</Link>
+                    <Link href="/profile">Profile</Link>
+                    <Link href="/settings">Settings</Link>
                 </nav>
 
-
-                {/* Search Bar and Sign In Button */}
+                {/* Search Bar and Sign In Button or User Info */}
                 <div className="flex items-center space-x-4">
                     {/* Go Live Button */}
                     <Link href="/livestream">
@@ -82,15 +94,41 @@ const Header = () => {
                         </svg>
                     </div>
 
+                    {/* If user is logged in, show username and avatar */}
+                    {userInfo.username ? (
+                        <div className="flex items-center space-x-2 relative">
+                            {/* User Info (name) */}
+                            <span className="text-white">{userInfo.username}</span>
 
+                            {/* Avatar Section */}
+                            <div
+                                onClick={toggleAvatarMenu}  // Toggle avatar click
+                                className="w-8 h-8 rounded-full flex items-center justify-center bg-green-500 text-white cursor-pointer"
+                            >
+                                {userInfo.avatar}
+                            </div>
 
-                    {/* Sign In Button */}
-                    <button
-                        onClick={openModal} // Open the modal on click
-                        className="bg-green-800 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300"
-                    >
-                        Sign In
-                    </button>
+                            {/* Avatar Menu (Sign Out button) */}
+                            {isAvatarClicked && (  // Only show Sign Out when avatar is clicked
+                                <div className="absolute top-10 right-0 bg-gray-800 text-white rounded-lg shadow-lg w-48 p-3 mt-2">
+                                    <button
+                                        onClick={handleSignOut}
+                                        className="w-full text-red-500 bg-white py-2 px-4 rounded-full hover:bg-gray-200 transition duration-300"
+                                    >
+                                        Sign Out
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        // If user is not logged in, show Sign In button
+                        <button
+                            onClick={handleSignIn}
+                            className="bg-green-800 text-white py-2 px-4 rounded-full hover:bg-purple-700 transition duration-300"
+                        >
+                            Sign In
+                        </button>
+                    )}
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -98,8 +136,6 @@ const Header = () => {
                     <i className="fas fa-bars"></i> {/* Hamburger icon */}
                 </button>
             </div>
-
-            {showAuthModal && <AuthModal onClose={closeModal}/>}
 
         </header>
     );
