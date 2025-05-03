@@ -54,7 +54,6 @@ const Header = () => {
                     <h1 className="text-3xl font-semibold">EchoVerse</h1>
                 </div>
 
-                {/* Navigation Links (move search and Go Live to the right) */}
                 <nav className="flex space-x-8 items-center ml-auto">
                     {/* Search Bar */}
                     <div className="relative">

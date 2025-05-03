@@ -27,24 +27,22 @@ const mockChat: Chat = {
 };
 
 const ChatPopup = ({ chat, onClose }: { chat: Chat; onClose: () => void }) => {
-    const [newMessage, setNewMessage] = useState(""); // State to hold new message
+    const [newMessage, setNewMessage] = useState("");
 
-    // Function to handle input change
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNewMessage(e.target.value);
     };
 
-    // Function to handle sending a message
     const handleSendMessage = () => {
         if (newMessage.trim()) {
             const newMessageObject: Message = {
                 id: (chat.messages.length + 1).toString(),
                 text: newMessage,
-                sender: "You", // The sender will be "You" as it is the user's message
+                sender: "You",
                 time: new Date().toLocaleTimeString(),
             };
-            chat.messages.push(newMessageObject); // Add the new message to the messages array
-            setNewMessage(""); // Clear the input field
+            chat.messages.push(newMessageObject);
+            setNewMessage("");
         }
     };
 
@@ -76,12 +74,12 @@ const ChatPopup = ({ chat, onClose }: { chat: Chat; onClose: () => void }) => {
                 <input
                     type="text"
                     value={newMessage}
-                    onChange={handleInputChange} // Handle input change
+                    onChange={handleInputChange}
                     placeholder="Type a message..."
                     className="bg-gray-100 text-sm p-2 w-full rounded-lg focus:outline-none"
                 />
                 <button
-                    onClick={handleSendMessage} // Send message when button is clicked
+                    onClick={handleSendMessage}
                     className="bg-blue-500 text-white p-2 rounded-full"
                 >
                     Send
