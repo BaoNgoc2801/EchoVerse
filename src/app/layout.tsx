@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import ChatBox from "@/components/chat/chat"; // Import the ChatBox component
+import ChatBox from "@/components/chat/chat";
 
 
 import "@radix-ui/themes/styles.css";
