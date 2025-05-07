@@ -1,29 +1,30 @@
-"use client";
+
+ "use client";
 import React, { useState } from 'react';
 import { Camera } from 'lucide-react';
 import LayoutWithHeader from "../../../components/layout/layout-with-header";
+ import {uploadImage} from "@/services/profile-api";
 
-const Profile = () => {
-    const [showMore, setShowMore] = useState(false);
-    const [avatar, setAvatar] = useState<string | null>(null);
-    const [cover, setCover] = useState<string | null>(null);
+ const Profile = () => {
+     const [showMore, setShowMore] = useState(false);
+     const [avatar, setAvatar] = useState<string | null>(null);
+     const [cover, setCover] = useState<string | null>(null);
+     const userId = "123"; // Replace with dynamic userId
 
-    const handleImageUpload = (
-        e: React.ChangeEvent<HTMLInputElement>,
-        setImage: (url: string) => void
-    ) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                if (reader.result) {
-                    setImage(reader.result.toString());
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+     const handleUpload = async (
+         e: React.ChangeEvent<HTMLInputElement>,
+         type: "avatar" | "cover"
+     ) => {
+         const file = e.target.files?.[0];
+         if (!file) return;
 
+         const uploadedUrl = await uploadImage(file, type, userId);
+         if (uploadedUrl) {
+             type === "avatar" ? setAvatar(uploadedUrl) : setCover(uploadedUrl);
+         } else {
+             alert(`Failed to upload ${type}`);
+         }
+     };
     return (
         <LayoutWithHeader>
             <div className="w-full min-h-screen">
@@ -41,7 +42,7 @@ const Profile = () => {
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    onChange={(e) => handleImageUpload(e, setCover)}
+                                    onChange={(e) => handleUpload(e, "cover")}
                                     className="hidden"
                                 />
                             </label>
@@ -57,7 +58,7 @@ const Profile = () => {
                                         <input
                                             type="file"
                                             accept="image/*"
-                                            onChange={(e) => handleImageUpload(e, setAvatar)}
+                                            onChange={(e) => handleUpload(e, "avatar")}
                                             className="hidden"
                                         />
                                     </label>
