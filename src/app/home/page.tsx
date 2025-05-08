@@ -53,12 +53,12 @@ const HomePage: FC = () => {
                 </div>
 
                 {/* Hero Banner */}
-                <div className="w-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-600 py-12 px-4 md:px-8">
-                    <div className="max-w-6xl mx-auto">
-                        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Discover Live Streams</h1>
-                        <p className="text-lg text-white/90 max-w-2xl">Watch your favorite streamers, discover new content, and join the conversation with thousands of viewers worldwide.</p>
-                    </div>
-                </div>
+                {/*<div className="w-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-600 py-12 px-4 md:px-8">*/}
+                {/*    <div className="max-w-6xl mx-auto">*/}
+                {/*        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Discover Live Streams</h1>*/}
+                {/*        <p className="text-lg text-white/90 max-w-2xl">Watch your favorite streamers, discover new content, and join the conversation with thousands of viewers worldwide.</p>*/}
+                {/*    </div>*/}
+                {/*</div>*/}
 
                 <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
                     {/* Trending Section */}
