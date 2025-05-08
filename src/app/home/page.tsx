@@ -5,6 +5,8 @@ import VideoCard from "../../components/ui/videoCard";
 import LayoutWithHeader from "../../components/layout/layout-with-header";
 import { Moon, Sun } from "lucide-react";
 
+import ThemeToggle from "../../components/ui/themeToggle";
+
 const HomePage: FC = () => {
     const [darkMode, setDarkMode] = useState(true);
 
@@ -40,6 +42,7 @@ const HomePage: FC = () => {
 
     return (
         <LayoutWithHeader>
+            <ThemeToggle />
             <div className={`transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'} min-h-screen`}>
                 {/* Theme toggle button */}
                 <div className="fixed top-6 right-6 z-50">

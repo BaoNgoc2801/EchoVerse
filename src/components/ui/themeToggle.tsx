@@ -1,22 +1,31 @@
-import { FC } from "react";
-import { useTheme } from "@/contexts/themeContext";
-import { Sun, Moon } from "lucide-react";
+"use client";
 
-const ThemeToggle: FC = () => {
-    const { darkMode, toggleTheme } = useTheme();
+import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+
+const ThemeToggle = () => {
+    const [darkMode, setDarkMode] = useState(true);
+
+    useEffect(() => {
+        if (darkMode) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [darkMode]);
+
+    const toggleTheme = () => setDarkMode((prev) => !prev);
 
     return (
-        <button
-            onClick={toggleTheme}
-            className={`p-2 rounded-full transition-colors duration-300 ${
-                darkMode
-                    ? "bg-gray-700 hover:bg-gray-600 text-yellow-300"
-                    : "bg-gray-200 hover:bg-gray-300 text-gray-800"
-            }`}
-            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-        >
-            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
+        <div className="fixed top-6 right-6 z-50">
+            <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full bg-gradient-to-r from-green-400 to-emerald-600 hover:from-green-500 hover:to-emerald-700 text-white shadow-lg flex items-center justify-center"
+                aria-label="Toggle theme"
+            >
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+        </div>
     );
 };
 
