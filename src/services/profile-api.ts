@@ -1,34 +1,101 @@
+import axios from 'axios';
+import { getAccessToken } from './auth-api';
 
-const UPLOAD_AVATAR_API = process.env.NEXT_PUBLIC_UPLOAD_AVATAR_API;
-const UPLOAD_COVER_API = process.env.NEXT_PUBLIC_UPLOAD_COVER_API;
+interface UploadResponse {
+    code: number;
+    result: {
+        url: string;
+    };
+}
 
-export const uploadImage = async (
-    file: File,
-    type: "avatar" | "cover",
-    userId: string
-): Promise<string | null> => {
+/**
+ * Upload user avatar
+ * @param file - The avatar image file to upload
+ * @returns Promise with the response containing the avatar URL
+ */
+export const uploadAvatar = async (file: File): Promise<UploadResponse> => {
     try {
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append('file', file);
 
-        const endpoint =
-            type === "avatar"
-                ? `${UPLOAD_AVATAR_API}/${userId}`
-                : `${UPLOAD_COVER_API}/${userId}`;
-
-        const response = await fetch(endpoint, {
-            method: "PUT",
-            body: formData,
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to upload image");
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+            throw new Error('Authentication required');
         }
 
-        const result = await response.json();
-        return result.url || null;
-    } catch (err) {
-        console.error("Upload error:", err);
-        return null;
+        const response = await axios.post(
+            process.env.NEXT_PUBLIC_UPLOAD_AVATAR_API || '',
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        console.error('Upload avatar error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Upload user cover image
+ * @param file - The cover image file to upload
+ * @returns Promise with the response containing the cover image URL
+ */
+export const uploadCover = async (file: File): Promise<UploadResponse> => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+            throw new Error('Authentication required');
+        }
+
+        const response = await axios.post(
+            process.env.NEXT_PUBLIC_UPLOAD_COVER_API || '',
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        console.error('Upload cover error:', error);
+        throw error;
+    }
+};
+
+// Example function to update user profile if needed
+export const updateUserProfile = async (profileData: any) => {
+    try {
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+            throw new Error('Authentication required');
+        }
+
+        // Replace with your actual profile update endpoint
+        const response = await axios.put(
+            `${process.env.NEXT_PUBLIC_SITE_URL}/api/profile/user`,
+            profileData,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        console.error('Update profile error:', error);
+        throw error;
     }
 };

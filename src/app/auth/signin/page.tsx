@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from '@/services/signin-api';
+import { loginUser, setAuthTokens } from '@/services/auth-api';
 
 const SignInPage = () => {
     const [username, setUsername] = useState('');
@@ -10,29 +10,50 @@ const SignInPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Basic validation
+        if (!username.trim() || !password.trim()) {
+            setError('Username and password are required');
+            return;
+        }
+
         setLoading(true);
         setError('');
 
         try {
-            const response = await signIn(username, password);
-            if (response && response.username) {
-                localStorage.setItem('username', response.username);
+            const response = await loginUser({
+                username,
+                password
+            });
 
-                if (username === 'admin' && password === 'admin') {
-                    router.push('/admin/dashboard');
-                } else {
-                    router.push('/home');
-                }
+            // Log the full response for debugging
+            console.log('Login response:', response);
+
+            if (response && response.result) {
+                const { accessToken, refreshToken } = response.result;
+
+                // Store tokens in localStorage
+                setAuthTokens(accessToken, refreshToken);
+
+                // Log the tokens for debugging purposes
+                console.log('Access token:', accessToken);
+                console.log('Refresh token:', refreshToken);
+
+                // Redirect to profile page
+                router.push('/settings/profile');
+            } else {
+                setError('Invalid credentials');
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error('Login error:', err);
+            setError(err.response?.data?.message || 'An error occurred during sign in');
         } finally {
             setLoading(false);
         }
     };
-
 
     return (
         <div className="flex h-screen items-center justify-center bg-[#1a1a1a]">
@@ -66,6 +87,7 @@ const SignInPage = () => {
 
                     <div className="flex justify-between items-center mt-4">
                         <button
+                            type="button"
                             onClick={() => router.push('/auth/forgot-password')}
                             className="text-sm text-green-500 hover:text-green-700"
                         >
@@ -74,6 +96,7 @@ const SignInPage = () => {
                         <p className="text-sm text-gray-500">
                             Don't have an account?{' '}
                             <button
+                                type="button"
                                 onClick={() => router.push('/auth/signup')}
                                 className="text-green-500 hover:text-green-700"
                             >
@@ -90,8 +113,6 @@ const SignInPage = () => {
                         {loading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
-
-
             </div>
         </div>
     );

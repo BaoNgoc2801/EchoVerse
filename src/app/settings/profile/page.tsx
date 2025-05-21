@@ -2,18 +2,48 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, User, Calendar, Mail, Phone, MapPin } from 'lucide-react';
 import LayoutWithHeader from "../../../components/layout/layout-with-header";
-import { uploadImage } from "@/services/profile-api";
+import { uploadAvatar } from "@/services/profile-api";
 import ThemeToggle from "@/components/ui/themeToggle";
+import { useRouter } from 'next/navigation';
+
+interface ProfileData {
+    userId: string;
+    username: string;
+    channelName: string;
+    bio: string;
+    subscribers: string;
+    email: string;
+    phone: string;
+    dateOfBirth: string;
+    address: string;
+    avatar: string | null;
+    cover: string | null;
+}
 
 const Profile = () => {
+    const router = useRouter();
     const [darkMode, setDarkMode] = useState(true);
     const [mounted, setMounted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     // Local states
     const [showMore, setShowMore] = useState(false);
-    const [avatar, setAvatar] = useState<string | null>(null);
-    const [cover, setCover] = useState<string | null>(null);
-    const userId = "123"; // Replace with dynamic userId
+
+    // Profile data state
+    const [profileData, setProfileData] = useState<ProfileData>({
+        userId: "123", // This would normally come from auth context
+        username: "BaoNgoc",
+        channelName: "TyTy's World",
+        bio: "Hi! I'm BaoNgoc, a content creator passionate about tech, travel, and lifestyle. Welcome to my channel!",
+        subscribers: "1.2M",
+        email: "baongoc@example.com",
+        phone: "+1 (555) 123-4567",
+        dateOfBirth: "January 1, 2004",
+        address: "123 Binh Duong, Ho Chi Minh City",
+        avatar: null,
+        cover: null
+    });
 
     // Handle theme mounting to prevent hydration mismatch
     useEffect(() => {
@@ -22,7 +52,13 @@ const Profile = () => {
         // Check if dark mode is already set in localStorage or system preference
         const isDarkMode = document.documentElement.classList.contains('dark');
         setDarkMode(isDarkMode);
-    }, []);
+
+        // Check for auth token
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            router.push('/auth/signin');
+        }
+    }, [router]);
 
     const handleUpload = async (
         e: React.ChangeEvent<HTMLInputElement>,
@@ -31,11 +67,31 @@ const Profile = () => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const uploadedUrl = await uploadImage(file, type, userId);
-        if (uploadedUrl) {
-            type === "avatar" ? setAvatar(uploadedUrl) : setCover(uploadedUrl);
-        } else {
-            alert(`Failed to upload ${type}`);
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            setError("Authentication required");
+            router.push('/auth/signin');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const uploadedUrl = await uploadAvatar(file, type, profileData.userId, token);
+
+            if (uploadedUrl) {
+                setProfileData(prev => ({
+                    ...prev,
+                    [type]: uploadedUrl
+                }));
+            } else {
+                setError(`Failed to upload ${type}`);
+            }
+        } catch (err) {
+            setError(`Error uploading ${type}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -70,7 +126,24 @@ const Profile = () => {
                     : 'bg-gradient-to-br from-emerald-50 to-green-100 text-gray-800'
             }`}>
                 {/* Theme Toggle Component */}
-                <ThemeToggle />
+                <div className="absolute top-4 right-4 z-10">
+                    <ThemeToggle />
+                </div>
+
+                {/* Error notification */}
+                {error && (
+                    <div className="max-w-screen-xl mx-auto px-4 sm:px-8 pt-4">
+                        <div className={`rounded-lg p-4 ${isDark ? 'bg-red-900/50 text-red-200' : 'bg-red-100 text-red-800'} mb-4`}>
+                            <p>{error}</p>
+                            <button
+                                className="text-sm font-medium underline mt-1"
+                                onClick={() => setError(null)}
+                            >
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-8 py-12">
                     <div className={`rounded-3xl shadow-xl overflow-hidden border ${
@@ -80,8 +153,13 @@ const Profile = () => {
                     }`}>
                         {/* Cover */}
                         <div className="relative h-72 w-full">
+                            {loading && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-10">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                                </div>
+                            )}
                             <img
-                                src={cover || "https://via.placeholder.com/1200x300"}
+                                src={profileData.cover || "https://via.placeholder.com/1200x300"}
                                 alt="Cover"
                                 className="w-full h-full object-cover"
                             />
@@ -101,12 +179,13 @@ const Profile = () => {
                                     accept="image/*"
                                     onChange={(e) => handleUpload(e, "cover")}
                                     className="hidden"
+                                    disabled={loading}
                                 />
                             </label>
                             <div className="absolute -bottom-16 left-8">
                                 <div className="relative w-32 h-32">
                                     <img
-                                        src={avatar || "https://via.placeholder.com/150"}
+                                        src={profileData.avatar || "https://via.placeholder.com/150"}
                                         alt="Avatar"
                                         className={`w-32 h-32 rounded-full border-4 shadow-xl object-cover ${
                                             isDark ? 'border-gray-700' : 'border-white'
@@ -121,6 +200,7 @@ const Profile = () => {
                                             accept="image/*"
                                             onChange={(e) => handleUpload(e, "avatar")}
                                             className="hidden"
+                                            disabled={loading}
                                         />
                                     </label>
                                 </div>
@@ -130,8 +210,12 @@ const Profile = () => {
                         {/* Profile Info */}
                         <div className="pt-20 px-8 sm:px-12 pb-12">
                             <div className={`border-b pb-6 mb-8 ${isDark ? 'border-gray-700' : 'border-green-100'}`}>
-                                <h1 className={`text-4xl font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Bao Ngoc</h1>
-                                <p className={isDark ? 'text-green-400 text-lg font-medium' : 'text-green-600 text-lg font-medium'}>@baongoc</p>
+                                <h1 className={`text-4xl font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {profileData.username}
+                                </h1>
+                                <p className={isDark ? 'text-green-400 text-lg font-medium' : 'text-green-600 text-lg font-medium'}>
+                                    @{profileData.username.toLowerCase()}
+                                </p>
                                 <div className="flex items-center mt-3">
                                     <span className={isDark ? 'mr-2 text-gray-300' : 'mr-2 text-gray-700'}>Channel:</span>
                                     <span className={`font-medium px-3 py-1 rounded-full text-sm ${
@@ -139,7 +223,7 @@ const Profile = () => {
                                             ? 'text-green-300 bg-green-900/50'
                                             : 'text-green-700 bg-green-50'
                                     }`}>
-                                        TyTy's World
+                                        {profileData.channelName}
                                     </span>
                                 </div>
                             </div>
@@ -156,8 +240,7 @@ const Profile = () => {
                                         : 'bg-green-50 border-l-4 border-green-500'
                                 }`}>
                                     <p className={isDark ? 'text-gray-300 text-base leading-relaxed' : 'text-gray-700 text-base leading-relaxed'}>
-                                        Hi! I'm BaoNgoc, a content creator passionate about tech, travel, and lifestyle.
-                                        Welcome to my channel!
+                                        {profileData.bio}
                                     </p>
                                 </div>
                             </div>
@@ -176,7 +259,7 @@ const Profile = () => {
                                         </span>
                                         <div>
                                             <div className={isDark ? 'text-sm text-green-400 font-medium' : 'text-sm text-green-700 font-medium'}>Channel Name</div>
-                                            <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>TyTy's World</div>
+                                            <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>{profileData.channelName}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center">
@@ -185,7 +268,7 @@ const Profile = () => {
                                         </span>
                                         <div>
                                             <div className={isDark ? 'text-sm text-green-400 font-medium' : 'text-sm text-green-700 font-medium'}>Subscribers</div>
-                                            <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>1.2M</div>
+                                            <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>{profileData.subscribers}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -206,7 +289,7 @@ const Profile = () => {
                                             </span>
                                             <div>
                                                 <div className={isDark ? 'text-sm text-green-400 font-medium' : 'text-sm text-green-700 font-medium'}>Email</div>
-                                                <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>baongoc@example.com</div>
+                                                <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>{profileData.email}</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center">
@@ -215,7 +298,7 @@ const Profile = () => {
                                             </span>
                                             <div>
                                                 <div className={isDark ? 'text-sm text-green-400 font-medium' : 'text-sm text-green-700 font-medium'}>Phone Number</div>
-                                                <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>+1 (555) 123-4567</div>
+                                                <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>{profileData.phone}</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center">
@@ -224,7 +307,7 @@ const Profile = () => {
                                             </span>
                                             <div>
                                                 <div className={isDark ? 'text-sm text-green-400 font-medium' : 'text-sm text-green-700 font-medium'}>Date of Birth</div>
-                                                <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>January 1, 2004</div>
+                                                <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>{profileData.dateOfBirth}</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center">
@@ -233,7 +316,7 @@ const Profile = () => {
                                             </span>
                                             <div>
                                                 <div className={isDark ? 'text-sm text-green-400 font-medium' : 'text-sm text-green-700 font-medium'}>Address</div>
-                                                <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>123 Binh Duong, Ho Chi Minh City</div>
+                                                <div className={isDark ? 'text-gray-300' : 'text-gray-800'}>{profileData.address}</div>
                                             </div>
                                         </div>
                                     </div>
