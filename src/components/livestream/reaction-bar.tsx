@@ -1,54 +1,71 @@
 "use client";
 
-import { useChat, useDataChannel } from "@livekit/components-react";
-import { Button, Flex, Tooltip } from "@radix-ui/themes";
-import { DataPacket_Kind } from "livekit-client";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { useMemo, useState } from "react";
+import { Flex, Button } from "@radix-ui/themes";
 
-export function ReactionBar() {
-  const [encoder] = useState(() => new TextEncoder());
-  const { send } = useDataChannel("reactions");
-  const { send: sendChat } = useChat();
+interface ReactionBarProps {
+  hostIdentity: string;
+  isHost: boolean;
+  viewerIdentity: string;
+}
 
-  const onSend = (emoji: string) => {
-    send(encoder.encode(emoji), { kind: DataPacket_Kind.LOSSY });
-    if (sendChat) {
-      sendChat(emoji);
-    }
+const reactions = [
+  {
+    value: "❤️",
+    label: "heart",
+  },
+  {
+    value: "👍",
+    label: "thumbs up",
+  },
+  {
+    value: "😂",
+    label: "laugh",
+  },
+  {
+    value: "🎉",
+    label: "celebrate",
+  },
+  {
+    value: "👏",
+    label: "clap",
+  },
+];
+
+export const ReactionBar = ({
+                              hostIdentity,
+                              isHost,
+                              viewerIdentity,
+                            }: ReactionBarProps) => {
+  const [selectedReaction, setSelectedReaction] = useState("");
+
+  const handleReactionClick = (reaction: string) => {
+    setSelectedReaction(reaction);
+
+    // You can implement WebSocket or LiveKit DataPublish to send reactions
+    setTimeout(() => {
+      setSelectedReaction("");
+    }, 1000);
   };
 
   return (
-    <Flex
-      gap="2"
-      justify="center"
-      align="center"
-      className="border-t border-accent-5 bg-accent-3 h-[100px] text-center"
-    >
-      <Tooltip content="Fire" delayDuration={0}>
-        <Button size="4" variant="outline" onClick={() => onSend("🔥")}>
-          🔥
-        </Button>
-      </Tooltip>
-      <Tooltip content="Applause">
-        <Button size="4" variant="outline" onClick={() => onSend("👏")}>
-          👏
-        </Button>
-      </Tooltip>
-      <Tooltip content="LOL">
-        <Button size="4" variant="outline" onClick={() => onSend("🤣")}>
-          🤣
-        </Button>
-      </Tooltip>
-      <Tooltip content="Love">
-        <Button size="4" variant="outline" onClick={() => onSend("❤️")}>
-          ❤️
-        </Button>
-      </Tooltip>
-      <Tooltip content="Confetti">
-        <Button size="4" variant="outline" onClick={() => onSend("🎉")}>
-          🎉
-        </Button>
-      </Tooltip>
-    </Flex>
+      <Flex justify="between" className={cn("p-3", isHost && "hidden")}>
+        <Flex gap="2">
+          {reactions.map((reaction) => (
+              <Button
+                  key={reaction.value}
+                  variant="ghost"
+                  className={cn(
+                      "h-8 w-8 rounded-full",
+                      selectedReaction === reaction.value && "bg-accent"
+                  )}
+                  onClick={() => handleReactionClick(reaction.value)}
+              >
+                {reaction.value}
+              </Button>
+          ))}
+        </Flex>
+      </Flex>
   );
-}
+};
