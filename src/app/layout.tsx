@@ -1,37 +1,36 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import ChatBox from "@/components/chat/chat"; // Import the ChatBox component
+import './globals.css';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { ThemeProvider } from '@/lib/theme-provider';
+import { Navbar } from '@/components/navbar';
+import { cn } from '@/lib/utils';
 
-
-import "@radix-ui/themes/styles.css";
-import { Theme, ThemePanel } from "@radix-ui/themes";
-
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: "Your App",
+  title: 'EchoVerse - Livestream Platform',
+  description: 'A modern livestreaming platform built with Next.js and Tailwind CSS',
 };
 
 export default function RootLayout({
-                                       children,
-                                   }: {
-    children: React.ReactNode;
+  children,
+}: {
+  children: React.ReactNode;
 }) {
-    return (
-        <html lang="en" className="mdl-js">
-        <body className={inter.className}>
-        <Theme
-            appearance="dark"
-            accentColor="purple"
-            grayColor="mauve"
-            radius="none"
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn(inter.className, "min-h-screen bg-background antialiased")}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
         >
-        <ChatBox />
+          <Navbar />
+          <main className="pt-16">
             {children}
-            <ThemePanel defaultOpen={false} />
-        </Theme>
-        </body>
-        </html>
-    );
+          </main>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
 }
