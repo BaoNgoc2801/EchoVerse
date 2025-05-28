@@ -1,8 +1,7 @@
 "use client";
 
-// import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import {  Stream } from "@/lib/types";
+import { Stream } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -15,38 +14,52 @@ interface StreamCardProps {
 
 export function StreamCard({ stream }: StreamCardProps) {
   const router = useRouter();
-  const { title, thumbnailUrl, viewerCount, user, isLive, createdAt, category } = stream;
+  const {
+    title,
+    thumbnailUrl,
+    viewerCount,
+    user,
+    isLive,
+    createdAt,
+    category,
+  } = stream;
 
   const handleClick = () => {
     if (isLive) {
-      router.push(`/stream?title=${encodeURIComponent(title)}&category=${encodeURIComponent(category)}`);
+      router.push(
+        `/stream?title=${encodeURIComponent(
+          title
+        )}&category=${encodeURIComponent(category)}`
+      );
     } else {
-      // In a real app, maybe show past broadcast or show a message
       console.log("This stream is no longer live");
     }
   };
 
   return (
     <Card
-      className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-md hover:scale-[1.02] bg-card border-border"
+      className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-md hover:scale-[1.02] border-0 bg-gray-800 dark:bg-gray-800 bg-black shadow-lg shadow-black/50 light:shadow-white/50 shadow-gray-200/20"
       onClick={handleClick}
     >
       <CardContent className="p-0">
         <div className="relative">
           <div className="aspect-video overflow-hidden relative">
             <img
-                src={thumbnailUrl}
-                alt={title}
-                className="w-full h-full object-cover"
+              src={thumbnailUrl}
+              alt={title}
+              className="w-full h-full object-cover"
             />
-
           </div>
 
           <div className="absolute top-2 left-2 flex gap-2">
             {isLive && (
-              <Badge className="bg-red-500 hover:bg-red-500 text-white">LIVE</Badge>
+              <Badge className="bg-red-500 hover:bg-red-500 text-white">
+                LIVE
+              </Badge>
             )}
-            <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">{category}</Badge>
+            <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">
+              {category}
+            </Badge>
           </div>
 
           {isLive && (
@@ -64,13 +77,18 @@ export function StreamCard({ stream }: StreamCardProps) {
               <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="overflow-hidden">
-              <h3 className="font-semibold line-clamp-1">{title}</h3>
-              <p className="text-sm text-muted-foreground">{user.name}</p>
-              <p className="text-xs text-muted-foreground">
+              <h3 className="font-semibold line-clamp-1 text-white dark:text-white text-gray-900">
+                {title}
+              </h3>
+              <p className="text-sm text-gray-400 dark:text-gray-400 text-gray-600">
+                {user.name}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-500 text-gray-500">
                 {isLive
                   ? "Streaming now"
-                  : `Streamed ${formatDistanceToNow(new Date(createdAt), { addSuffix: true })}`
-                }
+                  : `Streamed ${formatDistanceToNow(new Date(createdAt), {
+                      addSuffix: true,
+                    })}`}
               </p>
             </div>
           </div>

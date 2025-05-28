@@ -23,7 +23,7 @@ const SignInPage = () => {
                 if (username === 'admin' && password === 'admin') {
                     router.push('/admin/dashboard');
                 } else {
-                    router.push('/home');
+                    router.push('/');
                 }
             }
         } catch (err: any) {
