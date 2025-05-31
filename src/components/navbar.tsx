@@ -116,19 +116,29 @@ export function Navbar() {
 
               <ThemeToggle />
 
+              {/*<Button*/}
+              {/*    variant="ghost"*/}
+              {/*    size="icon"*/}
+              {/*    className="rounded-full"*/}
+              {/*    onClick={() => router.push("/profile")}*/}
+              {/*>*/}
+              {/*  <Avatar className="h-8 w-8">*/}
+              {/*    <AvatarImage src={CURRENT_USER.imageUrl} alt={CURRENT_USER.name} />*/}
+              {/*    <AvatarFallback className="bg-muted text-muted-foreground">*/}
+              {/*      {CURRENT_USER.name.charAt(0)}*/}
+              {/*    </AvatarFallback>*/}
+              {/*  </Avatar>*/}
+              {/*</Button>*/}
+
               <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full"
-                  onClick={() => router.push("/profile")}
+                  variant="default"
+                  size="sm"
+                  onClick={() => router.push("/auth/signin")}
+                  className="text-white bg-emerald-600 hover:bg-emerald-700"
               >
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={CURRENT_USER.imageUrl} alt={CURRENT_USER.name} />
-                  <AvatarFallback className="bg-muted text-muted-foreground">
-                    {CURRENT_USER.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
+                Login
               </Button>
+
             </div>
           </div>
         </div>

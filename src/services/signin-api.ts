@@ -15,7 +15,7 @@ export const signIn = async (username: string, password: string) => {
 
         if (response.data && response.data.code === 0 && response.data.result?._authenticated && response.data.result.token) {
 
-            localStorage.setItem('access_token', response.data.result.token);
+            localStorage.setItem("auth_token", response.data.result.token);
 
             return {
                 username,

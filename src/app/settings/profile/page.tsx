@@ -1,22 +1,83 @@
-// src/app/settings/profile/page.tsx
-import React from 'react';
+"use client";
 
-const Profile = () => {
-    return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-4xl font-bold mb-4">Your Profile</h1>
-            <div className="bg-gray-800 text-white p-6 rounded-lg">
-                <h2 className="text-2xl font-semibold">User Details</h2>
-                <div className="my-4">
-                    <strong>Name:</strong> John Doe
-                </div>
-                <div className="my-4">
-                    <strong>Email:</strong> johndoe@example.com
-                </div>
-                {/* More profile details */}
-            </div>
+import React, { useEffect, useState } from "react";
+import { fetchUserProfile, uploadAvatar } from "@/services/profile-api";
+
+export default function Profile() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const profile = await fetchUserProfile(); // Không cần truyền token nữa
+        setUser(profile);
+      } catch (err: any) {
+        setError(err.message || "Failed to load user");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const handleUpload = async () => {
+    if (!file || !user) return alert("No file selected");
+    try {
+      const result = await uploadAvatar(user.id, file);
+      alert("Uploaded successfully!");
+
+      const updated = await fetchUserProfile();
+      setUser(updated);
+    } catch (err: any) {
+      alert(err.message || "Upload failed");
+    }
+  };
+
+  if (loading) return <p className="text-white">Loading...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
+
+  const { username, profile } = user;
+  const { avatar, firstName, lastName, email } = profile;
+
+  return (
+    <div className="max-w-xl mx-auto p-4 text-white">
+      <h1 className="text-3xl font-bold mb-4">Your Profile</h1>
+
+      <p>
+        <strong>Username:</strong> {username}
+      </p>
+      <p>
+        <strong>Name:</strong> {lastName} {firstName}
+      </p>
+      <p>
+        <strong>Email:</strong> {email}
+      </p>
+
+      <div className="mt-6">
+        <p className="mb-2 font-semibold">Avatar:</p>
+        <img
+          src={avatar}
+          alt="avatar"
+          className="w-24 h-24 rounded-full object-cover"
+        />
+        <div className="mt-4 flex gap-2 items-center">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            className="text-sm"
+          />
+          <button
+            onClick={handleUpload}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          >
+            Upload Avatar
+          </button>
         </div>
-    );
-};
-
-export default Profile;
+      </div>
+    </div>
+  );
+}
