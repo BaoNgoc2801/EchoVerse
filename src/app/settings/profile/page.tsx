@@ -1,266 +1,143 @@
-"use client";
+'use client';
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 import {
   User,
   Mail,
   Phone,
-  MapPin,
-  Calendar,
-  Youtube,
-  Users,
   Camera,
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { fetchUserProfile, uploadAvatar } from "@/services/profile-api";
+  Youtube,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { fetchUserProfile, uploadAvatar } from '@/services/profile-api';
 
-const AnimatedGradientBorder = ({ children, className = "" }) => (
-  <motion.div
-    className={`relative ${className}`}
-    initial={{ opacity: 0, scale: 0.8 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 0.5 }}
-  >
-    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
-    <div className="relative bg-white dark:bg-gray-900 rounded-full p-1">
-      {children}
-    </div>
-  </motion.div>
+const AnimatedBorder = ({ children }: { children: React.ReactNode }) => (
+    <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative rounded-full shadow-lg"
+    >
+      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-400 via-lime-400 to-emerald-400 animate-pulse"></div>
+      <div className="relative bg-black rounded-full p-1">{children}</div>
+    </motion.div>
 );
 
-const AnimatedText = ({ text, className = "" }) => {
-  const words = text.split(" ");
-  return (
-    <p className={className}>
-      {words.map((word, index) => (
-        <motion.span
-          key={index}
-          className="inline-block"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05 }}
-        >
-          {word}&nbsp;
-        </motion.span>
-      ))}
-    </p>
-  );
-};
-
-const ProfileInfoItem = ({ icon, label, value, delay = 0 }) => (
-  <motion.div
-    className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-sm"
-    initial={{ opacity: 0, x: -30 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ delay: delay * 0.1 }}
-  >
-    <div className="flex-shrink-0 mt-0.5 text-blue-600 dark:text-blue-400">
-      {icon}
-    </div>
-    <div className="min-w-0 flex-1">
-      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-        {label}
-      </p>
-      <p className="text-sm text-gray-600 dark:text-gray-400 break-words">
-        {value}
-      </p>
-    </div>
-  </motion.div>
+const ProfileInfo = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
+    <motion.div
+        className="flex items-start gap-4 bg-gradient-to-r from-[#0f0f0f] to-[#1b1b1b] p-5 rounded-xl shadow-xl hover:shadow-green-400/40 transition duration-300 border border-green-800/30"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+    >
+      <div className="text-green-400 mt-1">{icon}</div>
+      <div>
+        <p className="text-sm text-gray-400 font-semibold mb-1 uppercase tracking-wide">{label}</p>
+        <p className="text-base text-white font-light break-words leading-snug">{value}</p>
+      </div>
+    </motion.div>
 );
 
 export default function Profile() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [file, setFile] = useState(null);
-  const coverInputRef = useRef(null);
-  const avatarInputRef = useRef(null);
+  const avatarRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const load = async () => {
-      try {
-        const data = await fetchUserProfile();
-        setUser(data);
-      } catch (err) {
-        setError(err.message || "Failed to load user");
-      } finally {
-        setLoading(false);
-      }
+      const data = await fetchUserProfile();
+      setUser(data);
+      setLoading(false);
     };
     load();
   }, []);
 
-  const handleUpload = async (selectedFile) => {
-    if (!selectedFile || !user) return alert("No file selected");
-    try {
-      await uploadAvatar(user.id, selectedFile);
-      const updated = await fetchUserProfile();
-      setUser(updated);
-      alert("Uploaded successfully!");
-    } catch (err) {
-      alert(err.message || "Upload failed");
-    }
+  const handleUpload = async (file: File, type: 'avatar' | 'cover') => {
+    if (!file || !user) return;
+    await uploadAvatar(user.id, file);
+    const updated = await fetchUserProfile();
+    setUser(updated);
   };
 
-  const handleAvatarChange = async (e) => {
-    const selectedFile = e.target.files?.[0] || null;
-    if (selectedFile) {
-      setFile(selectedFile); // optional, if you still want to keep it in state
-      await handleUpload(selectedFile);
-    }
-  };
-
-  if (loading) return <p className="text-white">Loading...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  if (loading) return <p className="text-white text-center py-10">Loading...</p>;
 
   const profile = user.profile;
-  const fullName = `${profile.firstName} ${profile.middleName || ""} ${
-    profile.lastName
-  }`.trim();
+  const fullName = `${profile.firstName} ${profile.middleName || ''} ${profile.lastName}`.trim();
 
   return (
-    <motion.div
-      className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-green-950 text-white py-10 px-4 md:px-12">
         <motion.div
-          className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-white/20"
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-6xl mx-auto rounded-3xl overflow-hidden shadow-[0_0_40px_#22c55e55] border border-green-600/20 bg-black/90 backdrop-blur-xl"
         >
-          <div className="relative h-48 -mb-12">
-            <div
-              className="h-full w-full bg-cover bg-center"
-              style={{ backgroundImage: `url(${profile.coverImage})` }}
+          <div className="relative h-72">
+            <img
+                src={profile.coverImage}
+                className="object-cover w-full h-full rounded-t-3xl"
+                alt="Cover"
             />
             <button
-              onClick={() => avatarInputRef.current?.click()}
-              className="absolute -right-2 -bottom-2 rounded-full bg-blue-600 p-2 text-white"
+                className="absolute top-4 right-4 p-2 bg-green-600 hover:bg-green-500 transition rounded-full shadow-md"
+                onClick={() => coverRef.current?.click()}
             >
-              <Camera className="h-4 w-4" />
+              <Camera className="text-white h-5 w-5" />
             </button>
-
             <input
-              ref={coverInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                ref={coverRef}
+                onChange={(e) => handleUpload(e.target.files?.[0]!, 'cover')}
             />
-            <div className="absolute -bottom-12 left-6">
-              <AnimatedGradientBorder className="rounded-full">
-                <div className="relative">
-                  <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                    <img
+            <div className="absolute -bottom-20 left-10">
+              <AnimatedBorder>
+                <div className="relative w-36 h-36 rounded-full overflow-hidden">
+                  <img
                       src={profile.avatar}
-                      alt={fullName}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <button
-                    onClick={() => avatarInputRef.current?.click()}
-                    className="absolute -right-2 -bottom-2 rounded-full bg-blue-600 p-2 text-white"
-                  >
-                    <Camera className="h-4 w-4" />
-                  </button>
-                  <input
-                    ref={avatarInputRef}
+                      alt="Avatar"
+                      className="object-cover w-full h-full"
+                  />
+                </div>
+              </AnimatedBorder>
+              <div className="absolute -bottom-0.25 -right-0.25 z-10">
+                <button
+                    className="p-2 bg-white hover:bg-gray-200 rounded-full shadow border border-gray-300"
+                    onClick={() => avatarRef.current?.click()}
+                >
+                  <Camera className="text-black h-4 w-4" />
+                </button>
+                <input
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={handleAvatarChange}
-                  />
-                </div>
-              </AnimatedGradientBorder>
+                    ref={avatarRef}
+                    onChange={(e) => handleUpload(e.target.files?.[0]!, 'avatar')}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="p-6 pt-16">
-            <div className="grid gap-8 md:grid-cols-3">
-              <div className="flex flex-col items-center md:col-span-1">
-                <div className="text-center mt-10">
-                  <h1 className="text-glow text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">
-                    {fullName}
-                  </h1>
-                  <p className="text-lg font-medium text-blue-600 dark:text-blue-400 mb-2">
-                    {profile.chanelName}
-                  </p>
-                  <div className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 rounded-full">
-                    <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                      {profile.subscribers || 0} subscribers
-                    </span>
-                  </div>
-                </div>
-              </div>
+          <div className="pt-32 pb-14 px-6 md:px-14">
+            <div className="text-center mb-12">
+              <h1 className="text-5xl font-bold text-white mb-2 tracking-tight leading-tight">
+                {fullName}
+              </h1>
+              <p className="text-xl font-medium text-green-400 opacity-90">{profile.chanelName}</p>
+            </div>
 
-              <div className="md:col-span-2">
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                      About Me
-                    </h2>
-                    <AnimatedText
-                      text={profile.bio}
-                      className="text-gray-600 dark:text-gray-300"
-                    />
-                  </div>
-
-                  <div className="h-px bg-gradient-to-r from-transparent via-blue-200 dark:via-blue-800 to-transparent my-6"></div>
-
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                      Contact Information
-                    </h2>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <ProfileInfoItem
-                        icon={<Mail className="h-5 w-5" />}
-                        label="Email"
-                        value={profile.email}
-                        delay={1}
-                      />
-                      <ProfileInfoItem
-                        icon={<Phone className="h-5 w-5" />}
-                        label="Phone"
-                        value={profile.phoneNumber}
-                        delay={2}
-                      />
-                      <ProfileInfoItem
-                        icon={<Calendar className="h-5 w-5" />}
-                        label="Date of Birth"
-                        value={profile.dob}
-                        delay={3}
-                      />
-                      <ProfileInfoItem
-                        icon={<MapPin className="h-5 w-5" />}
-                        label="Address"
-                        value={profile.address}
-                        delay={4}
-                      />
-                      <ProfileInfoItem
-                        icon={<User className="h-5 w-5" />}
-                        label="Full Name"
-                        value={fullName}
-                        delay={5}
-                      />
-                      <ProfileInfoItem
-                        icon={<Youtube className="h-5 w-5" />}
-                        label="Channel"
-                        value={profile.chanelName}
-                        delay={6}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <ProfileInfo icon={<User />} label="Full Name" value={fullName} />
+              <ProfileInfo icon={<Mail />} label="Email" value={profile.email} />
+              <ProfileInfo icon={<Phone />} label="Phone" value={profile.phoneNumber} />
+              <ProfileInfo icon={<Youtube />} label="Channel" value={profile.chanelName} />
+              <ProfileInfo icon={<User />} label="Bio" value={profile.bio} />
             </div>
           </div>
         </motion.div>
       </div>
-    </motion.div>
   );
 }
