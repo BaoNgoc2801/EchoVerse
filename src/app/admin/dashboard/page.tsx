@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Search,
   Bell,
@@ -11,6 +13,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import {useState} from "react";
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -126,23 +129,23 @@ const Dashboard = () => {
           {/* Left Content */}
           <div className="col-span-8">
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-green-900 via-green-800 to-black rounded-2xl p-8 mb-6 relative overflow-hidden h-64">
+            <div className="bg-gradient-to-r from-green-900 via-green-800 to-black rounded-2xl p-8 mb-6 relative overflow-hidden ">
               <div className="relative z-10">
                 <h1 className="text-4xl font-bold mb-4 leading-tight">
-                  Sell & Buy NFT
+                  Welcome to EchoVerse
                   <br />
-                  Digital Artworks
+                  Livestream Your World
                 </h1>
                 <p className="text-gray-300 mb-6 max-w-md">
-                  Create and sell your own collectible and become the richest
-                  NFT in the world
+                  Create your channel, go live, interact with your audience, and share unforgettable moments — all in one powerful platform.
+
                 </p>
                 <div className="flex space-x-4">
                   <button className="bg-orange-500 hover:bg-orange-600 px-6 py-3 rounded-lg font-semibold transition-colors">
-                    Explore Now
+                    Start Streaming
                   </button>
                   <button className="bg-transparent border border-gray-600 hover:bg-gray-800 px-6 py-3 rounded-lg font-semibold transition-colors">
-                    Create your first NFT
+                    Discover Channels
                   </button>
                 </div>
               </div>
@@ -157,7 +160,7 @@ const Dashboard = () => {
             {/* Trending NFT */}
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Trending NFT</h2>
+                <h2 className="text-2xl font-bold">Trending Livestreams</h2>
                 <button className="text-green-400 hover:text-green-300 flex items-center">
                   View More <span className="ml-2">→</span>
                 </button>
@@ -213,7 +216,7 @@ const Dashboard = () => {
             {/* Top Sellers */}
             <div className="bg-gray-900 border border-green-800 rounded-xl p-4">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Top Sellers</h2>
+                <h2 className="text-xl font-bold">Top Streamers</h2>
                 <button className="text-green-400 hover:text-green-300 text-sm">
                   View All →
                 </button>
@@ -284,7 +287,7 @@ const Dashboard = () => {
             {/* Live Auctions */}
             <div className="bg-gray-900 border border-green-800 rounded-xl p-4">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Live Auctions</h2>
+                <h2 className="text-xl font-bold">Live Actions</h2>
                 <button className="text-green-400 hover:text-green-300 text-sm">
                   EXPLORE MORE →
                 </button>
