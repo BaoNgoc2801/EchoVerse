@@ -14,24 +14,22 @@ import {
   X,
 } from "lucide-react";
 import {useEffect, useState} from "react";
+import { fetchTrendingStreams } from "@/services/dashboard-api"
+import { StreamItem } from "@/services/dashboard-api";
+
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [streams, setStreams] = useState([]);
+  const [streams, setStreams] = useState<StreamItem[]>([]);
 
   useEffect(() => {
-    const fetchStreams = async () => {
-      try {
-        const res = await fetch(process.env.NEXT_PUBLIC_IMAGES_API!);
-        const json = await res.json();
-        setStreams(json?.data || []);
-      } catch (error) {
-        console.error("Failed to fetch trending streams", error);
-      }
-    };
+    const loadStreams = async () => {
+      const data = await fetchTrendingStreams()
+      setStreams(data)
+    }
 
-    fetchStreams();
-  }, []);
+    loadStreams()
+  }, [])
 
   return (
     <div className="min-h-screen bg-black text-white flex">
@@ -176,22 +174,29 @@ const Dashboard = () => {
                 </button>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                {streams.map((stream, index) => (
-                    <div key={index} className="bg-gray-900 border border-green-800 rounded-xl p-4 hover:border-green-600 transition-colors">
+                {streams.map((stream) => (
+                    <div
+                        key={stream.id}
+                        className="bg-gray-900 border border-green-800 rounded-xl p-4 hover:border-green-600 transition-colors"
+                    >
                       <div className="h-48 rounded-lg mb-4 relative overflow-hidden">
-                        <img src={img.url} alt={img.title} className="w-full h-full object-cover rounded-lg" />
+                        <img
+                            src={stream.url}
+                            alt={stream.title}
+                            className="w-full h-full object-cover rounded-lg"
+                        />
                         <div className="absolute top-3 right-3 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                          <Heart className="w-4 h-4 text-black" />
+                          <span className="text-black text-sm font-bold">❤</span>
                         </div>
                       </div>
                       <h3 className="font-semibold mb-2">{stream.title}</h3>
                       <div className="flex items-center space-x-2 text-sm text-gray-400">
-                        <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-                        {/*<span>{stream.creator}</span>*/}
+                        <div className="w-6 h-6 bg-purple-600 rounded-full" />
                         <span>Live</span>
                       </div>
                     </div>
                 ))}
+
 
                 <div className="bg-gray-900 border border-green-800 rounded-xl p-4 hover:border-green-600 transition-colors">
                   <div className="bg-gradient-to-br from-blue-400 via-cyan-500 to-teal-600 h-48 rounded-lg mb-4 relative">
