@@ -56,12 +56,12 @@ const Dashboard = () => {
         {/* Logo */}
         <div
           className={`${
-            sidebarOpen ? "px-6 mb-8" : "px-4 mb-8"
+            sidebarOpen ? "px-6 mb-8  " : "px-4 mb-8"
           } flex items-center`}
         >
-          <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-            <Grid3X3 className="w-6 h-6" />
-          </div>
+          {/*<div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">*/}
+          {/*  <Grid3X3 className="w-6 h-6" />*/}
+          {/*</div>*/}
         </div>
 
         {/* Navigation Items */}
