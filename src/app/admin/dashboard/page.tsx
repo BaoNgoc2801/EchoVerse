@@ -13,10 +13,26 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [streams, setStreams] = useState([]);
+
+  useEffect(() => {
+    const fetchStreams = async () => {
+      try {
+        const res = await fetch(process.env.NEXT_PUBLIC_IMAGES_API!);
+        const json = await res.json();
+        setStreams(json?.data || []);
+      } catch (error) {
+        console.error("Failed to fetch trending streams", error);
+      }
+    };
+
+    fetchStreams();
+  }, []);
+
   return (
     <div className="min-h-screen bg-black text-white flex">
       {/* Toggle Button */}
@@ -107,22 +123,16 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="flex-1 p-6 transition-all duration-300">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8 pt-12">
+        <div className="flex justify-between items-center mb-8">
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search Artwork"
+              placeholder="Search livestream"
               className="w-full bg-gray-900 border border-green-800 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-green-600"
             />
           </div>
-          <div className="flex items-center space-x-4">
-            <Bell className="w-6 h-6 text-gray-400 cursor-pointer hover:text-green-400" />
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-green-600 rounded-full"></div>
-              <span className="text-white">Hi, Zack Foster!</span>
-            </div>
-          </div>
+
         </div>
 
         <div className="grid grid-cols-12 gap-6">
@@ -166,19 +176,22 @@ const Dashboard = () => {
                 </button>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gray-900 border border-green-800 rounded-xl p-4 hover:border-green-600 transition-colors">
-                  <div className="bg-gradient-to-br from-orange-600 via-red-600 to-red-800 h-48 rounded-lg mb-4 relative">
-                    <div className="absolute top-3 right-3 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                      <Heart className="w-4 h-4 text-black" />
+                {streams.map((stream, index) => (
+                    <div key={index} className="bg-gray-900 border border-green-800 rounded-xl p-4 hover:border-green-600 transition-colors">
+                      <div className="h-48 rounded-lg mb-4 relative overflow-hidden">
+                        <img src={img.url} alt={img.title} className="w-full h-full object-cover rounded-lg" />
+                        <div className="absolute top-3 right-3 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                          <Heart className="w-4 h-4 text-black" />
+                        </div>
+                      </div>
+                      <h3 className="font-semibold mb-2">{stream.title}</h3>
+                      <div className="flex items-center space-x-2 text-sm text-gray-400">
+                        <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
+                        {/*<span>{stream.creator}</span>*/}
+                        <span>Live</span>
+                      </div>
                     </div>
-                  </div>
-                  <h3 className="font-semibold mb-2">Full Abstract</h3>
-                  <div className="flex items-center space-x-2 text-sm text-gray-400">
-                    <div className="w-6 h-6 bg-purple-600 rounded-full"></div>
-                    <span>Esther Howard</span>
-                    <span>Creator</span>
-                  </div>
-                </div>
+                ))}
 
                 <div className="bg-gray-900 border border-green-800 rounded-xl p-4 hover:border-green-600 transition-colors">
                   <div className="bg-gradient-to-br from-blue-400 via-cyan-500 to-teal-600 h-48 rounded-lg mb-4 relative">
