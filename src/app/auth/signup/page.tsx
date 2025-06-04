@@ -80,7 +80,7 @@ const RegisterPage = () => {
                 <form onSubmit={handleSubmitForm} className="space-y-4">
                     {[
                         { label: "USERNAME", name: "username", type: "text" },
-                        { label: "FULL NAME", name: "firstName", type: "text" },
+                        { label: "FIRST NAME", name: "firstName", type: "text" },
                         { label: "LAST NAME", name: "lastName", type: "text" },
                         { label: "MIDDLE NAME", name: "middleName", type: "text" },
                         { label: "EMAIL", name: "email", type: "email" },
