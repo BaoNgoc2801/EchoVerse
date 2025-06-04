@@ -26,7 +26,7 @@ export async function fetchUserProfile() {
     throw new Error("Failed to fetch user profile");
   }
 }
-
+  
 export async function uploadAvatar(userId: number, file: File) {
   const token = localStorage.getItem("auth_token");
   if (!token) throw new Error("No token provided");
