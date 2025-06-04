@@ -2,24 +2,16 @@
 
 import {
   Search,
-  Bell,
-  User,
-  Grid3X3,
-  // Bookmark,
-  Settings,
-  // Palette,
-  // TrendingUp,
   Heart,
-  Menu,
-  X,
+
 } from "lucide-react";
 import {useEffect, useState} from "react";
 import { fetchTrendingStreams } from "@/services/dashboard-api"
 import { StreamItem } from "@/services/dashboard-api";
+import Sidebar from "@/components/common/sidebar";
 
 
 const Dashboard = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [streams, setStreams] = useState<StreamItem[]>([]);
 
   useEffect(() => {
@@ -33,107 +25,13 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-black text-white flex">
-      {/* Toggle Button */}
-      <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center hover:bg-green-700 transition-colors"
-        >
-          {sidebarOpen ? (
-            <X className="w-4 h-4" />
-          ) : (
-            <Menu className="w-4 h-4" />
-          )}
-        </button>
-      </div>
-
-      {/* Sidebar */}
-      <div
-        className={`${
-          sidebarOpen ? "w-64" : "w-16"
-        } bg-gradient-to-b from-green-900 to-black border-r border-green-800 flex flex-col py-4 transition-all duration-300 ease-in-out h-screen relative overflow-hidden`}
-      >
-        {/* Logo */}
-        <div
-          className={`${
-            sidebarOpen ? "px-6 mb-8  " : "px-4 mb-8"
-          } flex items-center`}
-        >
-          {/*<div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">*/}
-          {/*  <Grid3X3 className="w-6 h-6" />*/}
-          {/*</div>*/}
-        </div>
-
-        {/* Navigation Items */}
-        <div className={`${sidebarOpen ? "px-6" : "px-4"} space-y-2 flex-1`}>
-          {[
-            { icon: Grid3X3, label: "Dashboard", active: true },
-            { icon: User, label: "Top Streamer", active: false },
-            { icon: Settings, label: "Settings", active: false },
-            { icon: Bell, label: "Message", active: false },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className={`flex items-center ${
-                sidebarOpen ? "px-3" : "justify-center"
-              } py-3 rounded-lg cursor-pointer transition-colors ${
-                item.active ? "bg-green-800" : "hover:bg-green-800"
-              }`}
-            >
-              <item.icon className="w-5 h-5 text-orange-400" />
-              {sidebarOpen && (
-                <span className="ml-3 text-white">{item.label}</span>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Theme Toggle */}
-        <div className={`${sidebarOpen ? "px-6" : "px-4"} mt-auto`}>
-          <div
-            className={`flex ${
-              sidebarOpen ? "justify-between" : "justify-center"
-            } items-center`}
-          >
-            {sidebarOpen ? (
-              <div className="flex bg-gray-800 rounded-lg p-1">
-                <button className="flex items-center px-3 py-2 rounded-md bg-orange-500 text-black text-sm font-medium">
-                  <span className="mr-2">🌙</span>
-                  Dark
-                </button>
-                <button className="flex items-center px-3 py-2 rounded-md text-gray-400 text-sm font-medium hover:text-white">
-                  <span className="mr-2">☀️</span>
-                  Light
-                </button>
-              </div>
-            ) : (
-              <button className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                <span>🌙</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 p-6 transition-all duration-300">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search livestream"
-              className="w-full bg-gray-900 border border-green-800 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-green-600"
-            />
-          </div>
-
-        </div>
+<div className="mr-6">
+        <Sidebar />
+</div>
+      <div className="flex-1 transition-all duration-300 mt-4" >
 
         <div className="grid grid-cols-12 gap-6">
-          {/* Left Content */}
           <div className="col-span-8">
-            {/* Hero Section */}
             <div className="bg-gradient-to-r from-green-900 via-green-800 to-black rounded-2xl p-8 mb-6 relative overflow-hidden ">
               <div className="relative z-10">
                 <h1 className="text-4xl font-bold mb-4 leading-tight">
