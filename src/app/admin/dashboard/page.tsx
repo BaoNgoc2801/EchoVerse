@@ -248,7 +248,7 @@ const Dashboard = () => {
                     <div>
                       <div className="font-semibold">Esther Howard</div>
                       <div className="text-sm text-gray-400">
-                        0.00000301 BTC
+                        {/*0.00000301 BTC*/}
                       </div>
                     </div>
                   </div>
@@ -268,7 +268,7 @@ const Dashboard = () => {
                     <div>
                       <div className="font-semibold">Guy Hawkins</div>
                       <div className="text-sm text-gray-400">
-                        0.00000300 BTC
+                        {/*0.00000300 BTC*/}
                       </div>
                     </div>
                   </div>
@@ -288,7 +288,7 @@ const Dashboard = () => {
                     <div>
                       <div className="font-semibold">Robert Fox</div>
                       <div className="text-sm text-gray-400">
-                        0.00000278 BTC
+                        {/*0.00000278 BTC*/}
                       </div>
                     </div>
                   </div>
@@ -316,11 +316,12 @@ const Dashboard = () => {
                   </div>
                   <h3 className="font-semibold mb-1">Colorful Abstract</h3>
                   <div className="text-sm text-gray-400 mb-2">
-                    Highest bid: 1.45 ETH
+                    {/*Highest bid: 1.45 ETH*/}
                   </div>
                   <div className="flex justify-between items-center">
                     <button className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm font-semibold transition-colors">
-                      Place a Bid
+                      {/*Place a Bid*/}
+                      Join
                     </button>
                   </div>
                 </div>
@@ -333,11 +334,11 @@ const Dashboard = () => {
                   </div>
                   <h3 className="font-semibold mb-1">Modern Art Collection</h3>
                   <div className="text-sm text-gray-400 mb-2">
-                    Highest bid: 3.84 ETH
+                    {/*Highest bid: 3.84 ETH*/}
                   </div>
                   <div className="flex justify-between items-center">
                     <button className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm font-semibold transition-colors">
-                      Place a Bid
+                      Join
                     </button>
                   </div>
                 </div>
