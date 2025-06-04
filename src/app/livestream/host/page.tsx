@@ -1,25 +1,19 @@
 import { redirect } from "next/navigation";
-import HostPageImpl from "./page.client";
+import HostStreamPage from "./page.client";
 
 interface PageProps {
   searchParams: {
-    at: string | undefined;
-    rt: string | undefined;
+    username?: string;
+    room?: string;
   };
 }
 
-export default async function HostPage({
-                                         searchParams: { at, rt },
-                                       }: PageProps) {
-  console.log("at:", at, "rt:", rt); // Log the values to check if they're valid
+export default function HostPage({ searchParams }: PageProps) {
+  const { username, room } = searchParams;
 
-  if (!at || !rt) {
+  if (!username || !room) {
     redirect("/");
   }
 
-  const serverUrl = process.env.LIVEKIT_WS_URL!
-      .replace("wss://", "https://")
-      .replace("ws://", "http://");
-
-  return <HostPageImpl authToken={at} roomToken={rt} serverUrl={serverUrl} />;
+  return <HostStreamPage username={username} room={room} />;
 }
