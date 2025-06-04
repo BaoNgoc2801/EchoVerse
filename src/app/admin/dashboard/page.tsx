@@ -5,10 +5,10 @@ import {
   Bell,
   User,
   Grid3X3,
-  Bookmark,
+  // Bookmark,
   Settings,
-  Palette,
-  TrendingUp,
+  // Palette,
+  // TrendingUp,
   Heart,
   Menu,
   X,
@@ -56,24 +56,21 @@ const Dashboard = () => {
         {/* Logo */}
         <div
           className={`${
-            sidebarOpen ? "px-6 mb-8" : "px-4 mb-8"
+            sidebarOpen ? "px-6 mb-8  " : "px-4 mb-8"
           } flex items-center`}
         >
-          <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-            <Grid3X3 className="w-6 h-6" />
-          </div>
+          {/*<div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">*/}
+          {/*  <Grid3X3 className="w-6 h-6" />*/}
+          {/*</div>*/}
         </div>
 
         {/* Navigation Items */}
         <div className={`${sidebarOpen ? "px-6" : "px-4"} space-y-2 flex-1`}>
           {[
             { icon: Grid3X3, label: "Dashboard", active: true },
-            { icon: User, label: "Top Creators", active: false },
-            { icon: TrendingUp, label: "Bids", active: false },
+            { icon: User, label: "Top Streamer", active: false },
             { icon: Settings, label: "Settings", active: false },
             { icon: Bell, label: "Message", active: false },
-            { icon: Palette, label: "Analytics", active: false },
-            { icon: Bookmark, label: "Supports", active: false },
           ].map((item, index) => (
             <div
               key={index}
