@@ -6,23 +6,44 @@ import { Search, MessageSquare, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CURRENT_USER } from "@/lib/constants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { fetchContacts, Contact } from "@/services/chat-api";
+import debounce from "lodash.debounce";
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [allChannels, setAllChannels] = useState<Contact[]>([]);
+  const [filteredChannels, setFilteredChannels] = useState<Contact[]>([]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearchDebounced = debounce((query: string) => {
+    const filtered = allChannels.filter((channel) =>
+        channel.chanelName.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredChannels(filtered);
+  }, 300);
+
+  useEffect(() => {
+    const loadContacts = async () => {
+      const contacts = await fetchContacts();
+      setAllChannels(contacts);
+    };
+    loadContacts();
+  }, []);
+
+  useEffect(() => {
     if (searchQuery.trim()) {
-      console.log(`Searching for: ${searchQuery}`);
+      handleSearchDebounced(searchQuery);
+    } else {
+      setFilteredChannels([]);
     }
-  };
+    return () => {
+      handleSearchDebounced.cancel();
+    };
+  }, [searchQuery]);
 
   const handleGoLive = () => {
     router.push("/setup");
@@ -37,39 +58,56 @@ export function Navbar() {
   return (
       <nav className="fixed top-0 w-full bg-background/95 backdrop-blur-sm z-50 border-b border-border">
         <div className="container mx-auto px-4 flex items-center justify-between h-16">
-          {/* Logo and Desktop Navigation */}
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
                 <span className="font-bold text-white">EV</span>
               </div>
-              <span className="font-bold text-lg hidden sm:inline-block text-foreground">EchoVerse</span>
+              <span className="font-bold text-lg hidden sm:inline-block text-foreground">
+              EchoVerse
+            </span>
             </Link>
 
             <div className="hidden md:flex items-center space-x-4">
-              <Link href="/" className={cn(
-                  "text-sm font-medium transition-colors hover:text-emerald-500",
-                  pathname === "/" ? "text-emerald-500" : "text-muted-foreground"
-              )}>
+              <Link
+                  href="/"
+                  className={cn(
+                      "text-sm font-medium transition-colors hover:text-emerald-500",
+                      pathname === "/" ? "text-emerald-500" : "text-muted-foreground"
+                  )}
+              >
                 Home
               </Link>
-              <Link href="/following" className={cn(
-                  "text-sm font-medium transition-colors hover:text-emerald-500",
-                  pathname === "/following" ? "text-emerald-500" : "text-muted-foreground"
-              )}>
+              <Link
+                  href="/following"
+                  className={cn(
+                      "text-sm font-medium transition-colors hover:text-emerald-500",
+                      pathname === "/following"
+                          ? "text-emerald-500"
+                          : "text-muted-foreground"
+                  )}
+              >
                 Following
               </Link>
-              <Link href="/categories" className={cn(
-                  "text-sm font-medium transition-colors hover:text-emerald-500",
-                  pathname === "/categories" ? "text-emerald-500" : "text-muted-foreground"
-              )}>
+              <Link
+                  href="/categories"
+                  className={cn(
+                      "text-sm font-medium transition-colors hover:text-emerald-500",
+                      pathname === "/categories"
+                          ? "text-emerald-500"
+                          : "text-muted-foreground"
+                  )}
+              >
                 Categories
               </Link>
             </div>
           </div>
 
-          {/* Search Bar - Visible on larger screens */}
-          <form onSubmit={handleSearch} className="hidden md:flex items-center max-w-sm flex-1 mx-4">
+          {/* Search */}
+          <form
+              onSubmit={(e) => e.preventDefault()}
+              className="hidden md:flex items-center max-w-sm flex-1 mx-4"
+          >
             <div className="relative w-full">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -79,10 +117,25 @@ export function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
               />
+
+              {filteredChannels.length > 0 && (
+                  <div className="absolute top-full mt-1 w-full bg-black border border-border rounded shadow z-50 max-h-60 overflow-y-auto">
+                    {filteredChannels.map((channel) => (
+                        <Link
+                            key={channel.userId}
+                            href={`/chat`}
+                            className="block px-4 py-2 hover:bg-muted text-foreground"
+                            onClick={() => setSearchQuery("")}
+                        >
+                          {channel.chanelName}
+                        </Link>
+                    ))}
+                  </div>
+              )}
             </div>
           </form>
 
-          {/* Right Side Items */}
+          {/* Right actions */}
           <div className="flex items-center gap-2">
             {!isLiveStreamPage && (
                 <Button
@@ -94,7 +147,6 @@ export function Navbar() {
                 </Button>
             )}
 
-            {/* Mobile Menu Button */}
             <Button
                 variant="ghost"
                 size="icon"
@@ -113,23 +165,7 @@ export function Navbar() {
               >
                 <MessageSquare className="h-5 w-5" />
               </Button>
-
               <ThemeToggle />
-
-              {/*<Button*/}
-              {/*    variant="ghost"*/}
-              {/*    size="icon"*/}
-              {/*    className="rounded-full"*/}
-              {/*    onClick={() => router.push("/profile")}*/}
-              {/*>*/}
-              {/*  <Avatar className="h-8 w-8">*/}
-              {/*    <AvatarImage src={CURRENT_USER.imageUrl} alt={CURRENT_USER.name} />*/}
-              {/*    <AvatarFallback className="bg-muted text-muted-foreground">*/}
-              {/*      {CURRENT_USER.name.charAt(0)}*/}
-              {/*    </AvatarFallback>*/}
-              {/*  </Avatar>*/}
-              {/*</Button>*/}
-
               <Button
                   variant="default"
                   size="sm"
@@ -138,100 +174,9 @@ export function Navbar() {
               >
                 Login
               </Button>
-
             </div>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-            <div className="md:hidden bg-background border-t border-border">
-              <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-                <form onSubmit={handleSearch} className="flex items-center">
-                  <div className="relative w-full">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        type="search"
-                        placeholder="Search streams..."
-                        className="w-full pl-8 bg-background border-input text-foreground placeholder:text-muted-foreground"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                </form>
-
-                <div className="flex flex-col space-y-2">
-                  <Link
-                      href="/"
-                      className={cn(
-                          "p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors",
-                          pathname === "/" ? "bg-accent text-emerald-500" : "text-foreground"
-                      )}
-                      onClick={() => setIsMenuOpen(false)}
-                  >
-                    Home
-                  </Link>
-                  <Link
-                      href="/following"
-                      className={cn(
-                          "p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors",
-                          pathname === "/following" ? "bg-accent text-emerald-500" : "text-foreground"
-                      )}
-                      onClick={() => setIsMenuOpen(false)}
-                  >
-                    Following
-                  </Link>
-                  <Link
-                      href="/categories"
-                      className={cn(
-                          "p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors",
-                          pathname === "/categories" ? "bg-accent text-emerald-500" : "text-foreground"
-                      )}
-                      onClick={() => setIsMenuOpen(false)}
-                  >
-                    Categories
-                  </Link>
-                  <Link
-                      href="/chat"
-                      className={cn(
-                          "p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors",
-                          pathname === "/chat" ? "bg-accent text-emerald-500" : "text-foreground"
-                      )}
-                      onClick={() => setIsMenuOpen(false)}
-                  >
-                    Messages
-                  </Link>
-                  <Link
-                      href="/profile"
-                      className={cn(
-                          "p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors",
-                          pathname === "/profile" ? "bg-accent text-emerald-500" : "text-foreground"
-                      )}
-                      onClick={() => setIsMenuOpen(false)}
-                  >
-                    Profile
-                  </Link>
-
-                  {!isLiveStreamPage && (
-                      <Button
-                          onClick={() => {
-                            handleGoLive();
-                            setIsMenuOpen(false);
-                          }}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                      >
-                        Go Live
-                      </Button>
-                  )}
-
-                  <div className="flex items-center justify-between p-2 border-t border-border mt-2 pt-4">
-                    <span className="text-sm text-foreground">Toggle theme</span>
-                    <ThemeToggle />
-                  </div>
-                </div>
-              </div>
-            </div>
-        )}
       </nav>
   );
 }

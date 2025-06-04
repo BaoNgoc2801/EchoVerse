@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { connectWebSocket, sendMessage, disconnectWebSocket } from "@/services/webSocketClient";
 import { fetchMessages, fetchConversations,  fetchContacts } from "@/services/chat-api";
 import { fetchUserProfile } from "@/services/profile-api";
+import Sidebar from "@/components/common/sidebar";
 
 interface ChatMessage {
   senderId: number;
@@ -113,30 +114,8 @@ const Chat: React.FC = () => {
 
   return (
       <div className="flex h-screen">
-        <div className="w-1/4 bg-black/30 border-r border-emerald-500/20 overflow-y-auto">
-          <div className="p-4 text-white text-xl font-bold border-b border-emerald-500/20">Conversations</div>
-          {conversations.map((convo) => {
-            const otherId = convo.userOneId === senderId ? convo.userTwoId : convo.userOneId;
-            const contact = contacts[otherId];
-            return (
-                <button
-                    key={convo.conversationId}
-                    onClick={() => loadConversation(convo)}
-                    className={`w-full text-left px-4 py-3 hover:bg-emerald-800/30 transition ${
-                        convo.conversationId === currentConversationId ? 'bg-emerald-600/20' : ''
-                    }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    {contact?.avatar ? (
-                        <img src={contact.avatar} alt={contact.chanelName} className="w-8 h-8 rounded-full object-cover" />
-                    ) : (
-                        <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white">💬</div>
-                    )}
-                    <div className="text-white">{contact?.chanelName || `User ${otherId}`}</div>
-                  </div>
-                </button>
-            );
-          })}
+        <div className="mr-6">
+          <Sidebar />
         </div>
 
         <div className="flex-1 flex flex-col bg-gradient-to-br from-black via-emerald-900 to-black">
@@ -194,6 +173,34 @@ const Chat: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <div className="w-1/4 bg-black/30 border-r border-emerald-500/20 overflow-y-auto">
+          <div className="p-4 text-white text-xl font-bold border-b border-emerald-500/20">Conversations</div>
+          {conversations.map((convo) => {
+            const otherId = convo.userOneId === senderId ? convo.userTwoId : convo.userOneId;
+            const contact = contacts[otherId];
+            return (
+                <button
+                    key={convo.conversationId}
+                    onClick={() => loadConversation(convo)}
+                    className={`w-full text-left px-4 py-3 hover:bg-emerald-800/30 transition ${
+                        convo.conversationId === currentConversationId ? 'bg-emerald-600/20' : ''
+                    }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    {contact?.avatar ? (
+                        <img src={contact.avatar} alt={contact.chanelName} className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                        <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white">💬</div>
+                    )}
+                    <div className="text-white">{contact?.chanelName || `User ${otherId}`}</div>
+                  </div>
+                </button>
+            );
+          })}
+        </div>
+
+
       </div>
   );
 };

@@ -4,6 +4,8 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/lib/theme-provider';
 import { Navbar } from '@/components/navbar';
 import { cn } from '@/lib/utils';
+import  Sidebar  from '@/components/common/sidebar'
+
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -29,12 +31,13 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange={false}
         >
-            <div className="relative min-h-screen bg-background">
-                <Navbar />
-                <main className="pt-16 bg-background">
+            <Navbar />
+
+            <main className="flex min-h-screen pt-16">
+                <div className="flex-1 overflow-y-auto">
                     {children}
-                </main>
-            </div>
+                </div>
+            </main>
         </ThemeProvider>
         </body>
         </html>

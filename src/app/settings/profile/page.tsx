@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fetchUserProfile, uploadAvatar } from '@/services/profile-api';
+import Sidebar from "@/components/common/sidebar";
 
 const AnimatedBorder = ({ children }: { children: React.ReactNode }) => (
     <motion.div
@@ -67,13 +68,18 @@ export default function Profile() {
   const fullName = `${profile.firstName} ${profile.middleName || ''} ${profile.lastName}`.trim();
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-green-950 text-white py-10 px-4 md:px-12">
+      <div className="h-screen flex bg-gradient-to-br from-black via-gray-900 to-green-950 text-white ">
+        <div className="mr-6">
+          <Sidebar />
+        </div>
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}
-            className="max-w-6xl mx-auto rounded-3xl overflow-hidden shadow-[0_0_40px_#22c55e55] border border-green-600/20 bg-black/90 backdrop-blur-xl"
+            className="w-full mt-4 rounded-3xl overflow-hidden shadow-[0_0_40px_#22c55e55] border border-green-600/20 bg-black/90 backdrop-blur-xl"
         >
+
+
           <div className="relative h-72">
             <img
                 src={profile.coverImage}
