@@ -31,12 +31,12 @@ const Dashboard = () => {
         <div className="flex h-screen overflow-hidden ml-6">
             <div className="flex-1 transition-all duration-300 mt-4 overflow-y-auto px-4">
                 <div className="flex flex-col justify-between items-center mb-4">
-                    <h2 className="text-4xl font-bold items-center">Posts</h2>
+                    <h2 className="text-4xl font-bold items-center">Explore</h2>
                 </div>
                 <div className="flex justify-end mb-6 ">
-                <button className="text-green-400 hover:text-green-300 flex items-center justify-center rounded-full border border-green-500 w-10 h-10">
-                    <Plus className="w-5 h-5" />
-                </button>
+                {/*<button className="text-green-400 hover:text-green-300 flex items-center justify-center rounded-full border border-green-500 w-10 h-10">*/}
+                {/*    <Plus className="w-5 h-5" />*/}
+                {/*</button>*/}
                 </div>
 
 

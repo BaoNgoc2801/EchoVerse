@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { fetchContacts, Contact } from "@/services/chat-api";
 import debounce from "lodash.debounce";
+import { fetchUserProfile } from "@/services/profile-api";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -18,6 +19,23 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [allChannels, setAllChannels] = useState<Contact[]>([]);
   const [filteredChannels, setFilteredChannels] = useState<Contact[]>([]);
+  const [imgProfile, setImgProfile] = useState<string>("");
+  const at = localStorage.getItem("auth_token");
+
+  useEffect(() => {
+    const fetchUserImageProfile = async () => {
+      const res = await fetchUserProfile();
+      console.log("res user profile", res);
+      if (res.profile.avatar) {
+        setImgProfile(res.profile.avatar);
+      } else {
+        const firstLetter = res.profile.firstName.slice(0, 1);
+        setImgProfile(firstLetter);
+      }
+    };
+
+    fetchUserImageProfile();
+  }, []);
 
   const handleSearchDebounced = debounce((query: string) => {
     const filtered = allChannels.filter((channel) =>
@@ -153,7 +171,11 @@ export function Navbar() {
                 className="md:hidden text-foreground"
                 onClick={toggleMenu}
             >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMenuOpen ? (
+                  <X className="h-5 w-5" />
+              ) : (
+                  <Menu className="h-5 w-5" />
+              )}
             </Button>
 
             <div className="hidden md:flex items-center gap-2">
@@ -166,14 +188,29 @@ export function Navbar() {
                 <MessageSquare className="h-5 w-5" />
               </Button>
               <ThemeToggle />
-              <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => router.push("/auth/signin")}
-                  className="text-white bg-emerald-600 hover:bg-emerald-700"
-              >
-                Login
-              </Button>
+
+              {at ? (
+                  imgProfile.length > 1 ? (
+                      <img
+                          src={imgProfile}
+                          alt="img-profile"
+                          className="size-10 rounded-full"
+                      />
+                  ) : (
+                      <span className="p-2 rounded-full bg-black text-white">
+                  {imgProfile}
+                </span>
+                  )
+              ) : (
+                  <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => router.push("/auth/signin")}
+                      className="text-white bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    Login
+                  </Button>
+              )}
             </div>
           </div>
         </div>

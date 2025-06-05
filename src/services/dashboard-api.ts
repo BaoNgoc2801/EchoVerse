@@ -34,3 +34,5 @@ export const fetchTrendingStreams = async (): Promise<StreamItem[]> => {
         return [];
     }
 };
+
+
