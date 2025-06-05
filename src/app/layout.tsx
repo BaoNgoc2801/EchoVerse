@@ -4,8 +4,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/lib/theme-provider';
 import { Navbar } from '@/components/navbar';
 import { cn } from '@/lib/utils';
-import  Sidebar  from '@/components/common/sidebar'
-
+import Sidebar from '@/components/common/sidebar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -33,11 +32,15 @@ export default function RootLayout({
         >
             <Navbar />
 
-            <main className="flex min-h-screen pt-16">
-                <div className="flex-1 overflow-y-auto">
-                    {children}
+            <div className="flex min-h-screen pt-16">
+                <div className="sticky top-16 h-[calc(100vh-4rem)] shrink-0">
+                    <Sidebar />
                 </div>
-            </main>
+
+                <main className="flex-1 overflow-y-auto">
+                    {children}
+                </main>
+            </div>
         </ThemeProvider>
         </body>
         </html>
