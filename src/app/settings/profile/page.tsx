@@ -1,16 +1,12 @@
-'use client';
-
-import React, { useEffect, useRef, useState } from 'react';
+"use client";
+import React, { useEffect, useRef, useState } from "react";
+import { User, Mail, Phone, Camera, Youtube } from "lucide-react";
+import { motion } from "framer-motion";
 import {
-  User,
-  Mail,
-  Phone,
-  Camera,
-  Youtube,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { fetchUserProfile, uploadAvatar } from '@/services/profile-api';
-import Sidebar from "@/components/common/sidebar";
+  fetchUserProfile,
+  uploadAvatar,
+  uploadCoverImage,
+} from "@/services/profile-api";
 
 const AnimatedBorder = ({ children }: { children: React.ReactNode }) => (
     <motion.div
@@ -24,7 +20,15 @@ const AnimatedBorder = ({ children }: { children: React.ReactNode }) => (
     </motion.div>
 );
 
-const ProfileInfo = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
+const ProfileInfo = ({
+                       icon,
+                       label,
+                       value,
+                     }: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) => (
     <motion.div
         className="flex items-start gap-4 bg-gradient-to-r from-[#0f0f0f] to-[#1b1b1b] p-5 rounded-xl shadow-xl hover:shadow-green-400/40 transition duration-300 border border-green-800/30"
         initial={{ opacity: 0, y: 20 }}
@@ -34,8 +38,12 @@ const ProfileInfo = ({ icon, label, value }: { icon: React.ReactNode; label: str
     >
       <div className="text-green-400 mt-1">{icon}</div>
       <div>
-        <p className="text-sm text-gray-400 font-semibold mb-1 uppercase tracking-wide">{label}</p>
-        <p className="text-base text-white font-light break-words leading-snug">{value}</p>
+        <p className="text-sm text-gray-400 font-semibold mb-1 uppercase tracking-wide">
+          {label}
+        </p>
+        <p className="text-base text-white font-light break-words leading-snug">
+          {value}
+        </p>
       </div>
     </motion.div>
 );
@@ -55,31 +63,36 @@ export default function Profile() {
     load();
   }, []);
 
-  const handleUpload = async (file: File, type: 'avatar' | 'cover') => {
+  const handleUpload = async (file: File) => {
     if (!file || !user) return;
     await uploadAvatar(user.id, file);
     const updated = await fetchUserProfile();
     setUser(updated);
   };
 
-  if (loading) return <p className="text-white text-center py-10">Loading...</p>;
+  const handleUploadCover = async (file: File) => {
+    if (!file || !user) return;
+    await uploadCoverImage(user.id, file);
+    const updated = await fetchUserProfile();
+    setUser(updated);
+  };
+
+  if (loading)
+    return <p className="text-white text-center py-10">Loading...</p>;
 
   const profile = user.profile;
-  const fullName = `${profile.firstName} ${profile.middleName || ''} ${profile.lastName}`.trim();
+  const fullName = `${profile.firstName} ${profile.middleName || ""} ${
+      profile.lastName
+  }`.trim();
 
   return (
       <div className="h-screen flex bg-gradient-to-br from-black via-gray-900 to-green-950 text-white ">
-        <div className="mr-6">
-          <Sidebar />
-        </div>
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}
             className="w-full mt-4 rounded-3xl overflow-hidden shadow-[0_0_40px_#22c55e55] border border-green-600/20 bg-black/90 backdrop-blur-xl"
         >
-
-
           <div className="relative h-72">
             <img
                 src={profile.coverImage}
@@ -97,7 +110,7 @@ export default function Profile() {
                 accept="image/*"
                 className="hidden"
                 ref={coverRef}
-                onChange={(e) => handleUpload(e.target.files?.[0]!, 'cover')}
+                onChange={(e) => handleUploadCover(e.target.files?.[0]!)}
             />
             <div className="absolute -bottom-20 left-10">
               <AnimatedBorder>
@@ -121,7 +134,7 @@ export default function Profile() {
                     accept="image/*"
                     className="hidden"
                     ref={avatarRef}
-                    onChange={(e) => handleUpload(e.target.files?.[0]!, 'avatar')}
+                    onChange={(e) => handleUpload(e.target.files?.[0]!)}
                 />
               </div>
             </div>
@@ -132,14 +145,24 @@ export default function Profile() {
               <h1 className="text-5xl font-bold text-white mb-2 tracking-tight leading-tight">
                 {fullName}
               </h1>
-              <p className="text-xl font-medium text-green-400 opacity-90">{profile.chanelName}</p>
+              <p className="text-xl font-medium text-green-400 opacity-90">
+                {profile.chanelName}
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <ProfileInfo icon={<User />} label="Full Name" value={fullName} />
               <ProfileInfo icon={<Mail />} label="Email" value={profile.email} />
-              <ProfileInfo icon={<Phone />} label="Phone" value={profile.phoneNumber} />
-              <ProfileInfo icon={<Youtube />} label="Channel" value={profile.chanelName} />
+              <ProfileInfo
+                  icon={<Phone />}
+                  label="Phone"
+                  value={profile.phoneNumber}
+              />
+              <ProfileInfo
+                  icon={<Youtube />}
+                  label="Channel"
+                  value={profile.chanelName}
+              />
               <ProfileInfo icon={<User />} label="Bio" value={profile.bio} />
             </div>
           </div>
@@ -147,3 +170,5 @@ export default function Profile() {
       </div>
   );
 }
+
+
