@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { connectWebSocket, sendMessage, disconnectWebSocket } from "@/services/webSocketClient";
 import { fetchMessages, fetchConversations,  fetchContacts } from "@/services/chat-api";
 import { fetchUserProfile } from "@/services/profile-api";
-import Sidebar from "@/components/common/sidebar";
 
 interface ChatMessage {
   senderId: number;
@@ -92,14 +91,15 @@ const Chat: React.FC = () => {
 
   const handleSend = () => {
     if (!inputMessage.trim() || senderId === null || receiverId === null || currentConversationId === null) return;
+
     const msg: ChatMessage = {
       senderId,
       receiverId,
       content: inputMessage,
       messageType: "TEXT",
     };
+
     sendMessage("/app/chat.sendMessage", msg);
-    setMessages((prev) => [...prev, msg]);
     setInputMessage("");
   };
 
