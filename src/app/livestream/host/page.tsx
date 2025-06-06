@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchCategoriesWithRooms, createLiveRoom, Category } from "@/services/livestream-api";
 import { fetchUserProfile } from "@/services/profile-api";
-import { useRouter } from "next/navigation";
+import HostStreamPage from "./page.client";
 
 export default function LivestreamHostPage() {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -14,21 +14,18 @@ export default function LivestreamHostPage() {
     const [streamerId, setStreamerId] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
 
-    const router = useRouter();
+    const [goLive, setGoLive] = useState(false);
+    const [token, setToken] = useState("");
+    const [room, setRoom] = useState("");
+    const [username, setUsername] = useState("");
 
     useEffect(() => {
-        console.log("Fetching categories...");
         fetchCategoriesWithRooms()
-            .then(data => {
-                console.log("Fetched categories:", data);
-                setCategories(data);
-            })
+            .then(setCategories)
             .catch(console.error);
 
-        console.log("Fetching user profile...");
         fetchUserProfile()
             .then(profile => {
-                console.log("Fetched profile:", profile);
                 setStreamerId(profile.streamer?.id || null);
             })
             .catch(console.error);
@@ -37,9 +34,7 @@ export default function LivestreamHostPage() {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            console.log("Fetching profile for submission...");
             const profile = await fetchUserProfile();
-
             const allowedRoles = ["MODERATOR", "BROADCASTER"];
             const validRoles = profile.roles.filter((r: any) => allowedRoles.includes(r.name));
 
@@ -59,10 +54,15 @@ export default function LivestreamHostPage() {
                 thumbnail: thumbnail!,
             };
 
-            console.log("Submitting payload:", payload);
-            const room = await createLiveRoom(payload);
-            console.log("Room created:", room);
-            router.push(`/livestream/watch/${room.roomName}`);
+            const res = await createLiveRoom(payload);
+
+            localStorage.setItem("livekit_token", res.token);
+            localStorage.setItem("livekit_roomName", res.roomData.roomName);
+
+            setToken(res.token);
+            setRoom(res.roomData.roomName);
+            setUsername(profile.username);
+            setGoLive(true);
         } catch (err) {
             console.error("❌ Error creating room:", err);
             alert("Failed to create room");
@@ -70,6 +70,10 @@ export default function LivestreamHostPage() {
             setLoading(false);
         }
     };
+
+    if (goLive && token && room && username) {
+        return <HostStreamPage username={username} room={room} />;
+    }
 
     return (
         <div className="max-w-xl mx-auto p-4 space-y-4 text-white">

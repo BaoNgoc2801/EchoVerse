@@ -40,6 +40,13 @@ export interface CreateRoomPayload {
     thumbnail?: File | string; // Accept file or URL string
 }
 
+export interface CreateRoomResponse {
+    token: string;
+    livekitRoom: string;
+    roomData: Room;
+}
+
+
 export async function fetchCategoriesWithRooms(): Promise<Category[]> {
     const token = localStorage.getItem("auth_token");
     if (!token) throw new Error("No token found");
@@ -57,7 +64,7 @@ export async function fetchCategoriesWithRooms(): Promise<Category[]> {
     }
 }
 
-export async function createLiveRoom(payload: CreateRoomPayload): Promise<Room> {
+export async function createLiveRoom(payload: CreateRoomPayload): Promise<CreateRoomResponse> {
     console.log("📤 Creating room with payload:", payload);
 
     try {
@@ -70,7 +77,6 @@ export async function createLiveRoom(payload: CreateRoomPayload): Promise<Room> 
 
         const roleName = payload.roles.find(r => r.name === "MODERATOR" || r.name === "BROADCASTER")?.name;
         if (!roleName) throw new Error("Missing valid role");
-
         formData.append("roles", roleName);
 
         if (payload.thumbnail instanceof File) {
@@ -86,9 +92,15 @@ export async function createLiveRoom(payload: CreateRoomPayload): Promise<Room> 
         });
 
         console.log("✅ Room created successfully:", response.data);
-        return response.data.roomData;
+
+        return {
+            token: response.data.token,
+            livekitRoom: response.data.livekitRoom,
+            roomData: response.data.roomData,
+        };
     } catch (error) {
         console.error("❌ Failed to create live room:", error);
         throw new Error("Failed to create live room");
     }
 }
+
