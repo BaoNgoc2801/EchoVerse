@@ -54,7 +54,12 @@ const Chat: React.FC = () => {
   useEffect(() => {
     if (senderId !== null) {
       connectWebSocket(senderId, (msg: ChatMessage) => {
-        setMessages((prev) => [...prev, msg]);
+        setMessages((prev) => {
+          if (msg.senderId === senderId || msg.receiverId === senderId) {
+            return [...prev, msg];
+          }
+          return prev;
+        });
       });
       return () => {
         disconnectWebSocket();
@@ -62,6 +67,7 @@ const Chat: React.FC = () => {
       };
     }
   }, [senderId]);
+
 
   useEffect(() => {
     messageListRef.current?.scrollTo({
@@ -114,9 +120,6 @@ const Chat: React.FC = () => {
 
   return (
       <div className="flex h-screen">
-        <div className="mr-6">
-          <Sidebar />
-        </div>
 
         <div className="flex-1 flex flex-col bg-gradient-to-br from-black via-emerald-900 to-black">
           <div className="border-b border-emerald-400/20 px-6 py-4 flex items-center space-x-3">

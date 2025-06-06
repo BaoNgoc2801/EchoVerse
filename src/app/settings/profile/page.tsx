@@ -1,11 +1,12 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { User, Mail, Phone, Camera, Youtube } from "lucide-react";
+import { User, Mail, Phone, Camera, Youtube, Pencil } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   fetchUserProfile,
   uploadAvatar,
   uploadCoverImage,
+  updateUserProfile,
 } from "@/services/profile-api";
 
 const AnimatedBorder = ({ children }: { children: React.ReactNode }) => (
@@ -20,33 +21,73 @@ const AnimatedBorder = ({ children }: { children: React.ReactNode }) => (
     </motion.div>
 );
 
-const ProfileInfo = ({
-                       icon,
-                       label,
-                       value,
-                     }: {
+const EditableField = ({
+                         icon,
+                         label,
+                         field,
+                         value,
+                         userId,
+                         onUpdated,
+                       }: {
   icon: React.ReactNode;
   label: string;
+  field: string;
   value: string;
-}) => (
-    <motion.div
-        className="flex items-start gap-4 bg-gradient-to-r from-[#0f0f0f] to-[#1b1b1b] p-5 rounded-xl shadow-xl hover:shadow-green-400/40 transition duration-300 border border-green-800/30"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-    >
-      <div className="text-green-400 mt-1">{icon}</div>
-      <div>
-        <p className="text-sm text-gray-400 font-semibold mb-1 uppercase tracking-wide">
-          {label}
-        </p>
-        <p className="text-base text-white font-light break-words leading-snug">
-          {value}
-        </p>
-      </div>
-    </motion.div>
-);
+  userId: number;
+  onUpdated: () => void;
+}) => {
+  const [editing, setEditing] = useState(false);
+  const [currentValue, setCurrentValue] = useState(value || "");
+
+  const save = async () => {
+    try {
+      await updateUserProfile(userId, { [field]: currentValue });
+      onUpdated();
+    } catch (err) {
+      console.error("Update failed", err);
+    }
+    setEditing(false);
+  };
+
+  return (
+      <motion.div
+          className="flex items-start gap-4 bg-gradient-to-r from-[#0f0f0f] to-[#1b1b1b] p-5 rounded-xl shadow-xl hover:shadow-green-400/40 transition duration-300 border border-green-800/30"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+      >
+        <div className="text-green-400 mt-1">{icon}</div>
+        <div className="flex-1">
+          <p className="text-sm text-gray-400 font-semibold mb-1 uppercase tracking-wide">
+            {label}
+          </p>
+          {editing ? (
+              <input
+                  type={field === "dob" ? "date" : "text"}
+                  className="bg-transparent border border-green-500 text-white px-2 py-1 rounded w-full"
+                  value={currentValue}
+                  autoFocus
+                  onChange={(e) => setCurrentValue(e.target.value)}
+                  onBlur={save}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") e.currentTarget.blur();
+                  }}
+              />
+          ) : (
+              <div className="flex items-center justify-between">
+                <p className="text-base text-white font-light break-words leading-snug">
+                  {currentValue}
+                </p>
+                <button onClick={() => setEditing(true)}>
+                  <Pencil className="h-4 w-4 text-gray-400 hover:text-green-400" />
+                </button>
+              </div>
+          )}
+        </div>
+      </motion.div>
+  );
+};
 
 export default function Profile() {
   const [user, setUser] = useState<any>(null);
@@ -54,39 +95,36 @@ export default function Profile() {
   const avatarRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
 
+  const reload = async () => {
+    const updated = await fetchUserProfile();
+    setUser(updated);
+  };
+
   useEffect(() => {
-    const load = async () => {
-      const data = await fetchUserProfile();
-      setUser(data);
-      setLoading(false);
-    };
-    load();
+    reload().then(() => setLoading(false));
   }, []);
 
   const handleUpload = async (file: File) => {
     if (!file || !user) return;
     await uploadAvatar(user.id, file);
-    const updated = await fetchUserProfile();
-    setUser(updated);
+    reload();
   };
 
   const handleUploadCover = async (file: File) => {
     if (!file || !user) return;
     await uploadCoverImage(user.id, file);
-    const updated = await fetchUserProfile();
-    setUser(updated);
+    reload();
   };
 
-  if (loading)
-    return <p className="text-white text-center py-10">Loading...</p>;
+  if (loading) return <p className="text-white text-center py-10">Loading...</p>;
 
   const profile = user.profile;
-  const fullName = `${profile.firstName} ${profile.middleName || ""} ${
-      profile.lastName
-  }`.trim();
+  const fullName = [profile.firstName, profile.middleName, profile.lastName]
+      .filter(Boolean)
+      .join(" ");
 
   return (
-      <div className="h-screen flex bg-gradient-to-br from-black via-gray-900 to-green-950 text-white ">
+      <div className="min-h-screen flex bg-gradient-to-br from-black via-gray-900 to-green-950 text-white">
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -151,24 +189,36 @@ export default function Profile() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <ProfileInfo icon={<User />} label="Full Name" value={fullName} />
-              <ProfileInfo icon={<Mail />} label="Email" value={profile.email} />
-              <ProfileInfo
-                  icon={<Phone />}
-                  label="Phone"
-                  value={profile.phoneNumber}
-              />
-              <ProfileInfo
-                  icon={<Youtube />}
-                  label="Channel"
-                  value={profile.chanelName}
-              />
-              <ProfileInfo icon={<User />} label="Bio" value={profile.bio} />
+              <EditableField icon={<User />} label="First Name" field="firstName" value={profile.firstName} userId={user.id} onUpdated={reload} />
+              <EditableField icon={<User />} label="Middle Name" field="middleName" value={profile.middleName || ""} userId={user.id} onUpdated={reload} />
+              <EditableField icon={<User />} label="Last Name" field="lastName" value={profile.lastName || ""} userId={user.id} onUpdated={reload} />
+              <EditableField icon={<Mail />} label="Email" field="email" value={profile.email} userId={user.id} onUpdated={reload} />
+              <EditableField icon={<Phone />} label="Phone" field="phoneNumber" value={profile.phoneNumber} userId={user.id} onUpdated={reload} />
+              <EditableField icon={<Youtube />} label="Channel" field="chanelName" value={profile.chanelName} userId={user.id} onUpdated={reload} />
+              <EditableField icon={<User />} label="Bio" field="bio" value={profile.bio} userId={user.id} onUpdated={reload} />
+              <EditableField icon={<User />} label="Date of Birth" field="dob" value={profile.dob ? profile.dob.split("T")[0] : ""} userId={user.id} onUpdated={reload} />
+              <EditableField icon={<User />} label="Address" field="address" value={profile.address || ""} userId={user.id} onUpdated={reload} />
+
+              <motion.div
+                  className="flex items-start gap-4 bg-gradient-to-r from-[#0f0f0f] to-[#1b1b1b] p-5 rounded-xl shadow-xl border border-green-800/30"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+              >
+                <div className="text-green-400 mt-1"><User /></div>
+                <div>
+                  <p className="text-sm text-gray-400 font-semibold mb-1 uppercase tracking-wide">
+                    Subscribers
+                  </p>
+                  <p className="text-base text-white font-light break-words leading-snug">
+                    {profile.subscribers ?? "0"}
+                  </p>
+                </div>
+              </motion.div>
             </div>
           </div>
         </motion.div>
       </div>
   );
 }
-
-
