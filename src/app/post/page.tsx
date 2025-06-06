@@ -1,14 +1,14 @@
 "use client";
 
-import { Plus} from "lucide-react";
 import { useEffect, useState } from "react";
 import { fetchTrendingStreams, StreamItem } from "@/services/dashboard-api";
+import { useRouter } from "next/navigation"; // ✅ đúng
 
 const Dashboard = () => {
     const [streams, setStreams] = useState<StreamItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
+const router = useRouter ();
     useEffect(() => {
         const loadStreams = async () => {
             try {
@@ -63,6 +63,7 @@ const Dashboard = () => {
                         {streams.map((stream) => (
                             <div
                                 key={stream.id}
+                                onClick={() => router.push(`/post/images-detail/${stream.id}`)}
                                 className="break-inside-avoid bg-gray-900 border border-green-800 rounded-xl overflow-hidden hover:border-green-600 transition-colors cursor-pointer group"
                             >
                                 <div className="relative">
