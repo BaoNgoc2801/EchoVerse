@@ -21,8 +21,8 @@ export function Navbar() {
   const [filteredChannels, setFilteredChannels] = useState<Contact[]>([]);
   const [imgProfile, setImgProfile] = useState<string>("");
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // 🔐 Lấy token sau khi client mounted
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     setAuthToken(token);
@@ -30,14 +30,20 @@ export function Navbar() {
 
   useEffect(() => {
     const fetchUserImageProfile = async () => {
-      if (!authToken) return;
-      const res = await fetchUserProfile();
-      if (res.profile.avatar) {
-        setImgProfile(res.profile.avatar);
-      } else {
-        const firstLetter = res.profile.firstName?.charAt(0) || "U";
-        setImgProfile(firstLetter);
+      if (!authToken) return setLoading(false);
+      try {
+        const res = await fetchUserProfile();
+        if (res.profile.avatar) {
+          setImgProfile(res.profile.avatar);
+        } else {
+          const firstLetter = res.profile.firstName?.charAt(0) || "U";
+          setImgProfile(firstLetter);
+        }
+      } catch (error) {
+        localStorage.removeItem("auth_token");
+        setAuthToken(null);
       }
+      setLoading(false);
     };
 
     fetchUserImageProfile();
@@ -159,40 +165,41 @@ export function Navbar() {
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
 
-            <div className="hidden md:flex items-center gap-2">
-              <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-foreground"
-                  onClick={() => router.push("/chat")}
-              >
-                <MessageSquare className="h-5 w-5" />
-              </Button>
-              <ThemeToggle />
+            <Button
+                variant="ghost"
+                size="icon"
+                className="text-foreground"
+                onClick={() => router.push("/chat")}
+            >
+              <MessageSquare className="h-5 w-5" />
+            </Button>
 
-              {authToken ? (
-                  imgProfile.startsWith("http") ? (
-                      <img
-                          src={imgProfile}
-                          alt="img-profile"
-                          className="size-10 rounded-full"
-                      />
-                  ) : (
-                      <span className="p-2 rounded-full bg-black text-white">
-                  {imgProfile}
-                </span>
-                  )
-              ) : (
-                  <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => router.push("/auth/signin")}
-                      className="text-white bg-emerald-600 hover:bg-emerald-700"
-                  >
-                    Login
-                  </Button>
-              )}
-            </div>
+            <ThemeToggle />
+
+            {loading ? (
+                <div className="w-10 h-10 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin" />
+            ) : authToken ? (
+                imgProfile.startsWith("http") ? (
+                    <img
+                        src={imgProfile}
+                        alt="img-profile"
+                        className="size-10 rounded-full"
+                    />
+                ) : (
+                    <span className="p-2 rounded-full bg-black text-white">
+                {imgProfile}
+              </span>
+                )
+            ) : (
+                <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => router.push("/auth/signin")}
+                    className="text-white bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Login
+                </Button>
+            )}
           </div>
         </div>
       </nav>
