@@ -5,14 +5,14 @@ import {
     Room,
     createLocalAudioTrack,
     createLocalVideoTrack,
-    LocalTrackPublication,
     RoomConnectOptions,
 } from 'livekit-client';
 
-export default function HostLivePage() {
+export default function LivestreamBroadcastPage() {
     const [room, setRoom] = useState<Room | null>(null);
     const [isMicOn, setIsMicOn] = useState(true);
     const [isCamOn, setIsCamOn] = useState(true);
+
     const videoTrackRef = useRef<any>(null);
     const audioTrackRef = useRef<any>(null);
 
@@ -21,7 +21,7 @@ export default function HostLivePage() {
         const roomName = localStorage.getItem("livekit_roomName");
 
         if (!token || !roomName) {
-            console.error("Missing token or room name");
+            alert("Thiếu token hoặc roomName. Vui lòng tạo lại phòng.");
             return;
         }
 
@@ -41,17 +41,15 @@ export default function HostLivePage() {
                 await newRoom.localParticipant.publishTrack(videoTrack);
                 await newRoom.localParticipant.publishTrack(audioTrack);
 
-                // Lưu vào ref để điều khiển bật/tắt
-                videoTrackRef.current = videoTrack;
-                audioTrackRef.current = audioTrack;
-
-                const videoElement = document.getElementById('live-video') as HTMLVideoElement;
+                const videoElement = document.getElementById("live-video") as HTMLVideoElement;
                 if (videoElement) videoTrack.attach(videoElement);
 
+                videoTrackRef.current = videoTrack;
+                audioTrackRef.current = audioTrack;
                 setRoom(newRoom);
-                console.log("✅ Connected to room");
-            } catch (err) {
-                console.error("❌ Failed to connect:", err);
+                console.log("✅ Host connected & streaming");
+            } catch (error) {
+                console.error("❌ Failed to connect host to room:", error);
             }
         };
 
@@ -62,8 +60,7 @@ export default function HostLivePage() {
         };
     }, []);
 
-    // Toggle Microphone
-    const handleToggleMic = () => {
+    const toggleMic = () => {
         if (audioTrackRef.current) {
             const enabled = !isMicOn;
             audioTrackRef.current.setEnabled(enabled);
@@ -71,8 +68,7 @@ export default function HostLivePage() {
         }
     };
 
-    // Toggle Camera
-    const handleToggleCam = () => {
+    const toggleCam = () => {
         if (videoTrackRef.current) {
             const enabled = !isCamOn;
             videoTrackRef.current.setEnabled(enabled);
@@ -82,20 +78,14 @@ export default function HostLivePage() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
-            <h1 className="text-2xl mb-4">🎥 You are now Live</h1>
+            <h1 className="text-2xl mb-4">🎥 You are Live!</h1>
             <video id="live-video" autoPlay muted className="rounded-lg w-[720px] h-[480px] mb-4" />
             <div className="flex gap-4">
-                <button
-                    onClick={handleToggleMic}
-                    className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 transition"
-                >
-                    {isMicOn ? '🔇 Tắt mic' : '🎤 Bật mic'}
+                <button onClick={toggleMic} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">
+                    {isMicOn ? "🔇 Tắt Mic" : "🎤 Bật Mic"}
                 </button>
-                <button
-                    onClick={handleToggleCam}
-                    className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 transition"
-                >
-                    {isCamOn ? '📷 Tắt cam' : '🎥 Bật cam'}
+                <button onClick={toggleCam} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded">
+                    {isCamOn ? "📷 Tắt Cam" : "🎥 Bật Cam"}
                 </button>
             </div>
         </div>
