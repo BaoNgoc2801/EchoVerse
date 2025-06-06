@@ -20,22 +20,34 @@ export function Navbar() {
   const [allChannels, setAllChannels] = useState<Contact[]>([]);
   const [filteredChannels, setFilteredChannels] = useState<Contact[]>([]);
   const [imgProfile, setImgProfile] = useState<string>("");
-  const at = localStorage.getItem("auth_token");
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    setAuthToken(token);
+  }, []);
 
   useEffect(() => {
     const fetchUserImageProfile = async () => {
-      const res = await fetchUserProfile();
-      console.log("res user profile", res);
-      if (res.profile.avatar) {
-        setImgProfile(res.profile.avatar);
-      } else {
-        const firstLetter = res.profile.firstName.slice(0, 1);
-        setImgProfile(firstLetter);
+      if (!authToken) return setLoading(false);
+      try {
+        const res = await fetchUserProfile();
+        if (res.profile.avatar) {
+          setImgProfile(res.profile.avatar);
+        } else {
+          const firstLetter = res.profile.firstName?.charAt(0) || "U";
+          setImgProfile(firstLetter);
+        }
+      } catch (error) {
+        localStorage.removeItem("auth_token");
+        setAuthToken(null);
       }
+      setLoading(false);
     };
 
     fetchUserImageProfile();
-  }, []);
+  }, [authToken]);
 
   const handleSearchDebounced = debounce((query: string) => {
     const filtered = allChannels.filter((channel) =>
@@ -87,41 +99,21 @@ export function Navbar() {
             </Link>
 
             <div className="hidden md:flex items-center space-x-4">
-              <Link
-                  href="/"
-                  className={cn(
-                      "text-sm font-medium transition-colors hover:text-emerald-500",
-                      pathname === "/" ? "text-emerald-500" : "text-muted-foreground"
-                  )}
-              >
-                Home
-              </Link>
-              <Link
-                  href="/following"
-                  className={cn(
-                      "text-sm font-medium transition-colors hover:text-emerald-500",
-                      pathname === "/following"
-                          ? "text-emerald-500"
-                          : "text-muted-foreground"
-                  )}
-              >
-                Following
-              </Link>
-              <Link
-                  href="/categories"
-                  className={cn(
-                      "text-sm font-medium transition-colors hover:text-emerald-500",
-                      pathname === "/categories"
-                          ? "text-emerald-500"
-                          : "text-muted-foreground"
-                  )}
-              >
-                Categories
-              </Link>
+              {["/", "/following", "/categories"].map((path, i) => (
+                  <Link
+                      key={path}
+                      href={path}
+                      className={cn(
+                          "text-sm font-medium transition-colors hover:text-emerald-500",
+                          pathname === path ? "text-emerald-500" : "text-muted-foreground"
+                      )}
+                  >
+                    {["Home", "Following", "Categories"][i]}
+                  </Link>
+              ))}
             </div>
           </div>
 
-          {/* Search */}
           <form
               onSubmit={(e) => e.preventDefault()}
               className="hidden md:flex items-center max-w-sm flex-1 mx-4"
@@ -153,7 +145,6 @@ export function Navbar() {
             </div>
           </form>
 
-          {/* Right actions */}
           <div className="flex items-center gap-2">
             {!isLiveStreamPage && (
                 <Button
@@ -171,47 +162,44 @@ export function Navbar() {
                 className="md:hidden text-foreground"
                 onClick={toggleMenu}
             >
-              {isMenuOpen ? (
-                  <X className="h-5 w-5" />
-              ) : (
-                  <Menu className="h-5 w-5" />
-              )}
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
 
-            <div className="hidden md:flex items-center gap-2">
-              <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-foreground"
-                  onClick={() => router.push("/chat")}
-              >
-                <MessageSquare className="h-5 w-5" />
-              </Button>
-              <ThemeToggle />
+            <Button
+                variant="ghost"
+                size="icon"
+                className="text-foreground"
+                onClick={() => router.push("/chat")}
+            >
+              <MessageSquare className="h-5 w-5" />
+            </Button>
 
-              {at ? (
-                  imgProfile.length > 1 ? (
-                      <img
-                          src={imgProfile}
-                          alt="img-profile"
-                          className="size-10 rounded-full"
-                      />
-                  ) : (
-                      <span className="p-2 rounded-full bg-black text-white">
-                  {imgProfile}
-                </span>
-                  )
-              ) : (
-                  <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => router.push("/auth/signin")}
-                      className="text-white bg-emerald-600 hover:bg-emerald-700"
-                  >
-                    Login
-                  </Button>
-              )}
-            </div>
+            <ThemeToggle />
+
+            {loading ? (
+                <div className="w-10 h-10 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin" />
+            ) : authToken ? (
+                imgProfile.startsWith("http") ? (
+                    <img
+                        src={imgProfile}
+                        alt="img-profile"
+                        className="size-10 rounded-full"
+                    />
+                ) : (
+                    <span className="p-2 rounded-full bg-black text-white">
+                {imgProfile}
+              </span>
+                )
+            ) : (
+                <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => router.push("/auth/signin")}
+                    className="text-white bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Login
+                </Button>
+            )}
           </div>
         </div>
       </nav>

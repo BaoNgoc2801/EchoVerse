@@ -1,86 +1,211 @@
-"use client"
+// Chat.tsx
+"use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import {
+    connectWebSocket,
+    sendMessage,
+    disconnectWebSocket,
+} from "@/services/webSocketClient";
+import {
+    fetchMessages,
+    fetchConversations,
+} from "@/services/chat-api";
+import { fetchUserProfile } from "@/services/profile-api";
 
-type Message = {
-    id: string;
-    text: string;
-    sender: string;
-    time: string;
-};
+interface ChatMessage {
+    senderId: number;
+    receiverId: number;
+    content: string;
+    messageType: string;
+    timestamp?: number;
+}
 
-type Chat = {
-    id: string;
-    name: string;
-    messages: Message[];
-};
+const Chat: React.FC = () => {
+    const [senderId, setSenderId] = useState<number | null>(null);
+    const [receiverId, setReceiverId] = useState<number | null>(null);
+    const [conversationId, setConversationId] = useState<number | null>(null);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [inputMessage, setInputMessage] = useState("");
+    const messageListRef = useRef<HTMLDivElement>(null);
 
-const mockChat: Chat = {
-    id: "1",
-    name: "Akina Oanh",
-    messages: [
-        { id: "1", text: "Hey, how are you?", sender: "Akina Oanh", time: "10:30 AM" },
-        { id: "2", text: "I'm good, how about you?", sender: "You", time: "10:31 AM" },
-        { id: "3", text: "I'm doing well, thanks!", sender: "Akina Oanh", time: "10:32 AM" },
-        { id: "4", text: "What are you up to today?", sender: "Akina Oanh", time: "10:33 AM" },
-    ],
-};
+    useEffect(() => {
+        const init = async () => {
+            try {
+                console.log("🚀 Initializing chat...");
 
-const ChatPopup = ({ chat, onClose }: { chat: Chat; onClose: () => void }) => {
-    const [newMessage, setNewMessage] = useState("");
+                const profile = await fetchUserProfile();
+                console.log("👤 User profile:", profile);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setNewMessage(e.target.value);
+                // Đảm bảo profile.id là số hợp lệ
+                const senderIdNum = parseInt(String(profile.id), 10);
+                if (isNaN(senderIdNum)) {
+                    console.error("❌ Invalid sender ID from profile:", profile.id);
+                    return;
+                }
+
+                setSenderId(senderIdNum);
+                console.log("🔍 senderId set to:", senderIdNum);
+
+                const conversations = await fetchConversations(senderIdNum);
+                console.log("💬 Conversations:", conversations);
+
+                if (!conversations || conversations.length === 0) {
+                    console.warn("⚠️ No conversations found");
+                    return;
+                }
+
+                const firstConvo = conversations[0];
+                console.log("📋 First conversation:", firstConvo);
+
+                const otherId = firstConvo.userOneId === senderIdNum ? firstConvo.userTwoId : firstConvo.userOneId;
+
+                // Đảm bảo otherId là số hợp lệ
+                const receiverIdNum = parseInt(String(otherId), 10);
+                if (isNaN(receiverIdNum)) {
+                    console.error("❌ Invalid receiver ID:", otherId);
+                    return;
+                }
+
+                setReceiverId(receiverIdNum);
+                setConversationId(firstConvo.conversationId);
+
+                console.log("🔍 receiverId set to:", receiverIdNum);
+                console.log("🔍 conversationId set to:", firstConvo.conversationId);
+
+                const msgs = await fetchMessages(firstConvo.conversationId);
+                console.log("📨 Fetched messages:", msgs);
+
+                const formattedMessages = msgs.map((m: any) => ({
+                    senderId: parseInt(String(m.senderId), 10),
+                    receiverId: parseInt(String(m.receiverId), 10),
+                    content: m.message,
+                    messageType: m.messageType,
+                })).reverse();
+
+                setMessages(formattedMessages);
+                console.log("📝 Formatted messages:", formattedMessages);
+
+                // Kết nối WebSocket với logging chi tiết
+                console.log("🔌 Connecting WebSocket with:", {
+                    sender: senderIdNum,
+                    receiver: receiverIdNum,
+                    senderType: typeof senderIdNum,
+                    receiverType: typeof receiverIdNum
+                });
+
+                // Đảm bảo thứ tự tham số đúng: sender, receiver, callback
+                connectWebSocket(senderIdNum, receiverIdNum, (msg: ChatMessage) => {
+                    console.log("📥 WebSocket callback - Received new message:", msg);
+                    setMessages((prev) => {
+                        const isDuplicate = prev.some(existingMsg =>
+                            existingMsg.senderId === msg.senderId &&
+                            existingMsg.content === msg.content &&
+                            Math.abs(Date.now() - (existingMsg.timestamp || 0)) < 1000
+                        );
+                        if (isDuplicate) {
+                            console.log("⚠️ Duplicate message detected, skipping");
+                            return prev;
+                        }
+                        const newMessages = [...prev, { ...msg, timestamp: Date.now() }];
+                        console.log("✅ Added new message, total messages:", newMessages.length);
+                        return newMessages;
+                    });
+                });
+
+            } catch (error) {
+                console.error("❌ Error initializing chat:", error);
+            }
+        };
+
+        init();
+
+        return () => {
+            console.log("🧹 Cleaning up chat component...");
+            disconnectWebSocket();
+        };
+    }, []);
+
+    useEffect(() => {
+        if (messageListRef.current) {
+            messageListRef.current.scrollTo({
+                top: messageListRef.current.scrollHeight,
+                behavior: "smooth",
+            });
+        }
+    }, [messages]);
+
+    const handleSend = () => {
+        if (!inputMessage.trim() || senderId === null || receiverId === null) {
+            console.warn("⚠️ Cannot send message:", { inputMessage: inputMessage.trim(), senderId, receiverId });
+            return;
+        }
+
+        const msg: ChatMessage = {
+            senderId,
+            receiverId,
+            content: inputMessage,
+            messageType: "TEXT",
+        };
+
+        console.log("📤 Preparing to send message:", msg);
+
+        // Gửi tin nhắn qua WebSocket
+        sendMessage("/app/chat.sendMessage", msg);
+
+        setInputMessage("");
     };
 
-    const handleSendMessage = () => {
-        if (newMessage.trim()) {
-            const newMessageObject: Message = {
-                id: (chat.messages.length + 1).toString(),
-                text: newMessage,
-                sender: "You",
-                time: new Date().toLocaleTimeString(),
-            };
-            chat.messages.push(newMessageObject);
-            setNewMessage("");
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
         }
     };
 
     return (
-        <div className="fixed bottom-6 right-6 bg-white text-black shadow-lg rounded-lg w-80 p-4 z-20 max-h-96">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-xl">{chat.name}</h3>
-                <button onClick={onClose} className="text-gray-500 text-xl">
-                    X
-                </button>
+        <div className="flex flex-col h-screen bg-gray-900 text-white">
+            {/* Debug info */}
+            <div className="p-2 bg-gray-800 text-xs text-gray-400">
+                Sender: {senderId} | Receiver: {receiverId} | Conversation: {conversationId} | Messages: {messages.length}
             </div>
 
-            <div className="h-60 overflow-auto mb-4">
-                {/* Displaying messages */}
-                <div className="space-y-4">
-                    {chat.messages.map((message) => (
-                        <div key={message.id} className={`flex ${message.sender === "You" ? "justify-end" : "justify-start"} items-start`}>
-                            <div className={`text-sm text-gray-600 max-w-xs ${message.sender === "You" ? "bg-blue-100" : "bg-gray-100"} p-2 rounded-lg`}>
-                                <div className="font-semibold">{message.sender}</div>
-                                <div>{message.text}</div>
-                                <div className="text-xs text-gray-400">{message.time}</div>
+            <div className="flex-1 p-4">
+                <div
+                    ref={messageListRef}
+                    className="h-full overflow-y-auto space-y-2"
+                >
+                    {messages.map((m, i) => (
+                        <div
+                            key={i}
+                            className={`p-3 rounded max-w-xs ${
+                                m.senderId === senderId
+                                    ? 'bg-blue-600 ml-auto text-right'
+                                    : 'bg-gray-700 mr-auto'
+                            }`}
+                        >
+                            <div className="text-xs opacity-70 mb-1">
+                                From: {m.senderId} To: {m.receiverId}
                             </div>
+                            {m.content}
                         </div>
                     ))}
                 </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="p-4 bg-gray-800 flex gap-2">
                 <input
                     type="text"
-                    value={newMessage}
-                    onChange={handleInputChange}
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
                     placeholder="Type a message..."
-                    className="bg-gray-100 text-sm p-2 w-full rounded-lg focus:outline-none"
+                    className="flex-1 px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none"
                 />
                 <button
-                    onClick={handleSendMessage}
-                    className="bg-blue-500 text-white p-2 rounded-full"
+                    onClick={handleSend}
+                    disabled={!inputMessage.trim()}
+                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded font-medium"
                 >
                     Send
                 </button>
@@ -89,18 +214,4 @@ const ChatPopup = ({ chat, onClose }: { chat: Chat; onClose: () => void }) => {
     );
 };
 
-const ChatApp = () => {
-    const [isPopupVisible, setIsPopupVisible] = useState(true);
-
-    const handleClosePopup = () => {
-        setIsPopupVisible(false);
-    };
-
-    return (
-        <div>
-            {isPopupVisible && <ChatPopup chat={mockChat} onClose={handleClosePopup} />}
-        </div>
-    );
-};
-
-export default ChatApp;
+export default Chat;

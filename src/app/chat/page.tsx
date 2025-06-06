@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { connectWebSocket, sendMessage, disconnectWebSocket } from "@/services/webSocketClient";
 import { fetchMessages, fetchConversations,  fetchContacts } from "@/services/chat-api";
 import { fetchUserProfile } from "@/services/profile-api";
-import Sidebar from "@/components/common/sidebar";
 
 interface ChatMessage {
   senderId: number;
@@ -23,6 +22,7 @@ const Chat: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState<string>("");
   const messageListRef = useRef<HTMLDivElement>(null);
+  const currentSubscriptionRef = useRef<any>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -51,30 +51,14 @@ const Chat: React.FC = () => {
     init();
   }, []);
 
-  useEffect(() => {
-    if (senderId !== null) {
-      connectWebSocket(senderId, (msg: ChatMessage) => {
-        setMessages((prev) => {
-          if (msg.senderId === senderId || msg.receiverId === senderId) {
-            return [...prev, msg];
-          }
-          return prev;
-        });
-      });
-      return () => {
-        disconnectWebSocket();
-        setMessages([]);
-      };
+  const setupWebSocket = (userA: number, userB: number) => {
+    if (currentSubscriptionRef.current) {
+      currentSubscriptionRef.current.unsubscribe();
     }
-  }, [senderId]);
-
-
-  useEffect(() => {
-    messageListRef.current?.scrollTo({
-      top: messageListRef.current.scrollHeight,
-      behavior: "smooth",
+    currentSubscriptionRef.current = connectWebSocket(userA, userB, (msg: ChatMessage) => {
+      setMessages((prev) => [...prev, msg]);
     });
-  }, [messages]);
+  };
 
   const loadConversation = async (conversation: any, userId = senderId, contactMap = contacts) => {
     const otherId = conversation.userOneId === userId ? conversation.userTwoId : conversation.userOneId;
@@ -92,18 +76,30 @@ const Chat: React.FC = () => {
           messageType: m.messageType,
         })).reverse()
     );
+
+    if (userId && otherId) {
+      setupWebSocket(userId, otherId);
+    }
   };
+
+  useEffect(() => {
+    messageListRef.current?.scrollTo({
+      top: messageListRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages]);
 
   const handleSend = () => {
     if (!inputMessage.trim() || senderId === null || receiverId === null || currentConversationId === null) return;
+
     const msg: ChatMessage = {
       senderId,
       receiverId,
       content: inputMessage,
       messageType: "TEXT",
     };
+
     sendMessage("/app/chat.sendMessage", msg);
-    setMessages((prev) => [...prev, msg]);
     setInputMessage("");
   };
 
@@ -120,7 +116,6 @@ const Chat: React.FC = () => {
 
   return (
       <div className="flex h-screen">
-
         <div className="flex-1 flex flex-col bg-gradient-to-br from-black via-emerald-900 to-black">
           <div className="border-b border-emerald-400/20 px-6 py-4 flex items-center space-x-3">
             {receiverAvatar ? (
@@ -202,8 +197,6 @@ const Chat: React.FC = () => {
             );
           })}
         </div>
-
-
       </div>
   );
 };
