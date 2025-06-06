@@ -76,7 +76,7 @@ export function Navbar() {
   }, [searchQuery]);
 
   const handleGoLive = () => {
-    router.push("/setup");
+    router.push("/livestream/host");
   };
 
   const toggleMenu = () => {
