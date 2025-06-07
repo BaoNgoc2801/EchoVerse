@@ -5,10 +5,13 @@ import { useParams } from "next/navigation";
 import {
     fetchImageDetail,
     fetchComments,
-    uploadComments,
     CommentItem,
     ImageDetail,
 } from "@/services/dashboard-api";
+
+import {
+    uploadComment,
+} from "@/services/image-api"
 
 const ImageDetailPage = () => {
     const params = useParams();
@@ -17,7 +20,7 @@ const ImageDetailPage = () => {
     const [image, setImage] = useState<ImageDetail | null>(null);
     const [comments, setComments] = useState<CommentItem[]>([]);
     const [newComment, setNewComment] = useState("");
-    const [isPosting, setIsPosting ]= useState(false);
+    const [isPosting, setIsPosting] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -31,7 +34,7 @@ const ImageDetailPage = () => {
         if (!newComment.trim() || !userId) return;
 
         setIsPosting(true);
-        const success = await uploadComments(id, newComment, userId);
+        const success = await uploadComment(id, newComment, userId); // ✅ Đã sửa đúng tên
         setIsPosting(false);
 
         if (success) {
@@ -40,6 +43,7 @@ const ImageDetailPage = () => {
             setComments(updatedComments);
         }
     };
+
     return (
         <div className="p-6 text-white">
             {image ? (
@@ -89,7 +93,6 @@ const ImageDetailPage = () => {
                             >
                                 {isPosting ? "Posting..." : "Post Comment"}
                             </button>
-
                         </div>
                     </div>
                 </div>
