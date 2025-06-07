@@ -1,6 +1,7 @@
 // src/services/livestream-api.ts
 import axios from "axios";
-
+import { Room } from "livekit-client";
+import { fetchUserProfile } from "./profile-api";
 const BACKEND_URL: string = process.env.NEXT_PUBLIC_GET_CATEGORY_API ?? "";
 const CREATE_ROOM_URL: string = process.env.NEXT_PUBLIC_CREATE_ROOM_API ?? "";
 
@@ -103,4 +104,108 @@ export async function createLiveRoom(payload: CreateRoomPayload): Promise<Create
         throw new Error("Failed to create live room");
     }
 }
+
+
+
+export async function getLivestreamRooms() {
+    try {
+        if (!process.env.NEXT_PUBLIC_LIVESTREAM_API_URL) {
+            throw new Error("NEXT_PUBLIC_LIVESTREAM_API_URL is not defined in .env");
+        }
+
+        console.log(
+            "Fetching livestream rooms from:",
+            process.env.NEXT_PUBLIC_LIVESTREAM_API_URL
+        );
+        const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_LIVESTREAM_API_URL}/room`
+        );
+        console.log("Livestream rooms fetched:", response.data);
+        return response.data;
+    } catch (error: any) {
+        console.error("Error fetching livestream rooms:", {
+            errorMessage: error.message,
+            errorResponse: error.response?.data,
+        });
+        throw new Error("Failed to fetch livestream rooms");
+    }
+}
+
+export async function getTokenForUser(roomName: string) {
+    try {
+        if (!process.env.NEXT_PUBLIC_LIVESTREAM_API_URL) {
+            throw new Error("NEXT_PUBLIC_LIVESTREAM_API_URL is not defined in .env");
+        }
+
+        console.log("Fetching token for room:", {
+            roomName,
+            LIVESTREAM_API_URL: process.env.NEXT_PUBLIC_LIVESTREAM_API_URL,
+        });
+        const token = localStorage.getItem("auth_token");
+        console.log("Auth token from localStorage:", token ? "Found" : "Not found");
+        if (!token) {
+            throw new Error("No auth token found in localStorage");
+        }
+
+        const userProfile = await fetchUserProfile();
+        console.log("User profile fetched:", { userId: userProfile.id });
+        const userId = userProfile.id;
+
+        console.log("Sending request to generate token:", {
+            roomName,
+            identity: `user_${userId}`,
+        });
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_LIVESTREAM_API_URL}/livekit/generate-token`,
+            {
+                roomName,
+                identity: `user_${userId}`,
+                roles: [{ name: "USER" }],
+            }
+        );
+
+        console.log("Token response:", { token: response.data.token });
+        return response.data.token;
+    } catch (error: any) {
+        console.error("Error fetching token:", {
+            roomName,
+            errorMessage: error.message,
+            errorResponse: error.response?.data,
+        });
+        throw new Error(`Failed to fetch token for viewer: ${error.message}`);
+    }
+}
+
+export async function joinRoom(roomName: string) {
+    try {
+        if (!process.env.NEXT_PUBLIC_LIVEKIT_WS_URL) {
+            throw new Error("NEXT_PUBLIC_LIVEKIT_WS_URL is not defined in .env");
+        }
+
+        console.log("Starting to join room:", {
+            roomName,
+            LIVEKIT_WS_URL: process.env.NEXT_PUBLIC_LIVEKIT_WS_URL,
+        });
+        const token = await getTokenForUser(roomName);
+        console.log("Generated Token:", token);
+
+        const room = new Room();
+        console.log("Attempting to connect to LiveKit server...");
+        await room.connect(process.env.NEXT_PUBLIC_LIVEKIT_WS_URL, token, {
+            autoSubscribe: true,
+        });
+        console.log("Successfully connected to room:", roomName);
+
+        return room;
+    } catch (error: any) {
+        console.error("Error joining room:", {
+            roomName,
+            errorMessage: error.message,
+            errorResponse: error.response?.data,
+            stack: error.stack,
+        });
+        throw new Error(`Failed to join livestream room: ${error.message}`);
+    }
+}
+
 

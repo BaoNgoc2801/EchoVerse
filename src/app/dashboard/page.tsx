@@ -1,27 +1,38 @@
-"use client"
+"use client";
 
-import {
-  Heart,
-} from "lucide-react";
+import { Heart } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchTrendingStreams } from "@/services/dashboard-api"
-import { StreamItem } from "@/services/dashboard-api";
+import { useRouter } from "next/navigation";
+import { getLivestreamRooms, joinRoom } from "@/services/livestream-api";
+
+interface StreamItem {
+  id: number;
+  roomName: string;
+  thumbnail: string | null;
+  status: string;
+  maxParticipants: number;
+  createdAt: string;
+  updatedAt: string;
+  streamerId: number;
+  categoryId: number;
+}
 
 const Dashboard = () => {
   const [streams, setStreams] = useState<StreamItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const loadStreams = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchTrendingStreams();
+        const data = await getLivestreamRooms();
         setStreams(data);
-      } catch (err) {
-        setError('Failed to load trending streams');
-        console.error('Error loading streams:', err);
+      } catch (err: any) {
+        setError("Failed to load livestream rooms: " + err.message);
+        console.error("Error loading streams:", err);
       } finally {
         setLoading(false);
       }
@@ -29,6 +40,17 @@ const Dashboard = () => {
 
     loadStreams();
   }, []);
+
+  const handleJoinStream = async (roomName: string) => {
+    try {
+      await joinRoom(roomName);
+      console.log("Joined livestream room!");
+      router.push(`/livestream/watch/${roomName}`);
+    } catch (err: any) {
+      console.error("Error joining stream:", err);
+      setError("Failed to join livestream room: " + err.message);
+    }
+  };
 
   return (
       <div className="flex h-screen overflow-hidden ml-6">
@@ -43,7 +65,8 @@ const Dashboard = () => {
                     Livestream Your World
                   </h1>
                   <p className="text-gray-300 mb-6 max-w-md">
-                    Create your channel, go live, interact with your audience, and share unforgettable moments — all in one powerful platform.
+                    Create your channel, go live, interact with your audience, and
+                    share unforgettable moments — all in one powerful platform.
                   </p>
                   <div className="flex space-x-4">
                     <button className="bg-orange-500 hover:bg-orange-600 px-6 py-3 rounded-lg font-semibold transition-colors">
@@ -62,7 +85,6 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Trending Livestreams */}
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-2xl font-bold">Trending Livestreams</h2>
@@ -74,7 +96,10 @@ const Dashboard = () => {
                 {loading && (
                     <div className="grid grid-cols-3 gap-4">
                       {[1, 2, 3].map((i) => (
-                          <div key={i} className="bg-gray-900 border border-green-800 rounded-xl p-4 animate-pulse">
+                          <div
+                              key={i}
+                              className="bg-gray-900 border border-green-800 rounded-xl p-4 animate-pulse"
+                          >
                             <div className="bg-gray-700 h-48 rounded-lg mb-4"></div>
                             <div className="bg-gray-700 h-4 rounded mb-2"></div>
                             <div className="bg-gray-700 h-3 rounded w-20"></div>
@@ -95,17 +120,22 @@ const Dashboard = () => {
                           <div
                               key={stream.id}
                               className="bg-gray-900 border border-green-800 rounded-xl p-4 hover:border-green-600 transition-colors cursor-pointer"
+                              onClick={() => handleJoinStream(stream.roomName)}
                           >
                             <div className="h-48 rounded-lg mb-4 relative overflow-hidden">
                               <img
-                                  src={stream.url}
-                                  alt={stream.title}
+                                  src={
+                                      stream.thumbnail ||
+                                      "https://via.placeholder.com/300x200?text=No+Image"
+                                  }
+                                  alt={stream.roomName}
                                   className="w-full h-full object-cover rounded-lg"
                                   onError={(e) => {
-                                    // Fallback to gradient if image fails to load
                                     const target = e.target as HTMLImageElement;
-                                    target.style.display = 'none';
-                                    target.nextElementSibling?.classList.remove('hidden');
+                                    target.style.display = "none";
+                                    target.nextElementSibling?.classList.remove(
+                                        "hidden"
+                                    );
                                   }}
                               />
                               <div className="hidden bg-gradient-to-br from-gray-600 to-gray-800 w-full h-full rounded-lg flex items-center justify-center">
@@ -118,10 +148,12 @@ const Dashboard = () => {
                                 <Heart className="w-4 h-4 text-red-500" />
                               </div>
                               <div className="absolute bottom-3 left-3 bg-black/70 px-2 py-1 rounded text-xs">
-                                {Math.floor(Math.random() * 1000)}+ viewers
+                                {Math.floor(Math.random() * 1000)} viewers
                               </div>
                             </div>
-                            <h3 className="font-semibold mb-2 truncate">{stream.title}</h3>
+                            <h3 className="font-semibold mb-2 truncate">
+                              {stream.roomName}
+                            </h3>
                             <div className="flex items-center space-x-2 text-sm text-gray-400">
                               <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
                                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -130,7 +162,6 @@ const Dashboard = () => {
                             </div>
                           </div>
                       ))}
-
                     </div>
                 )}
               </div>
