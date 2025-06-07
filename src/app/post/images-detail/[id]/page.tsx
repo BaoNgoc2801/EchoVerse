@@ -20,7 +20,6 @@ const ImageDetailPage = () => {
     const [image, setImage] = useState<ImageDetail | null>(null);
     const [comments, setComments] = useState<CommentItem[]>([]);
     const [newComment, setNewComment] = useState("");
-    const [isPosting, setIsPosting] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -30,13 +29,10 @@ const ImageDetailPage = () => {
     }, [id]);
 
     const handlePostComment = async () => {
-        const userId = localStorage.getItem("user_id");
+        const userId = comments[0]?.userId || localStorage.getItem("user_id");
         if (!newComment.trim() || !userId) return;
 
-        setIsPosting(true);
-        const success = await uploadComment(id, newComment, userId); // ✅ Đã sửa đúng tên
-        setIsPosting(false);
-
+        const success = await uploadComment(id, newComment, userId);
         if (success) {
             setNewComment("");
             const updatedComments = await fetchComments(id);
@@ -88,10 +84,9 @@ const ImageDetailPage = () => {
                             />
                             <button
                                 onClick={handlePostComment}
-                                disabled={isPosting}
-                                className="mt-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white disabled:opacity-50"
+                                className="mt-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white"
                             >
-                                {isPosting ? "Posting..." : "Post Comment"}
+                                Post Comment
                             </button>
                         </div>
                     </div>

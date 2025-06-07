@@ -17,9 +17,12 @@ export interface ImageDetail {
 export interface CommentItem {
     id: string;
     text: string;
-    user?: { name?: string };
+    userId: string;
+    user?: {
+        name?: string;
+        email?: string;
+    };
 }
-
 
 
 export const fetchTrendingStreams = async (): Promise<StreamItem[]> => {
